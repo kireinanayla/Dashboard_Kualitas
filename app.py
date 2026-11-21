@@ -378,7 +378,7 @@ if "fishbone_generated" not in st.session_state:
 if "fmea_scores" not in st.session_state:
     st.session_state.fmea_scores = pd.DataFrame()
 
-CALENDAR_SVG = """<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>"""
+CALENDAR_SVG = '<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
 
 def render_header(judul="Six Sigma Dashboard"):
     df = st.session_state.df_produksi
@@ -389,24 +389,13 @@ def render_header(judul="Six Sigma Dashboard"):
     else:
         periode_teks = "Menunggu Data"
 
-    st.markdown(f"""
-    <div class="dashboard-header">
-        <h1 class="header-title">{judul}</h1>
-        <div class="period-badge">{CALENDAR_SVG} <span>Periode Analisis: {periode_teks}</span></div>
-    </div>
-    """, unsafe_allow_html=True)
+    html = f'<div class="dashboard-header"><h1 class="header-title">{judul}</h1><div class="period-badge">{CALENDAR_SVG} <span>Periode Analisis: {periode_teks}</span></div></div>'
+    st.markdown(html, unsafe_allow_html=True)
 
 def render_kpi(kolom, ikon, warna_ikon, aksen_bawah, label, nilai):
     ikon_html = f'<div class="kpi-icon {warna_ikon}">{ikon}</div>' if ikon else ""
-    kolom.markdown(f"""
-    <div class="kpi-box {aksen_bawah}">
-        {ikon_html}
-        <div class="kpi-content">
-            <div class="kpi-title">{label}</div>
-            <div class="kpi-number">{nilai}</div>
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    html = f'<div class="kpi-box {aksen_bawah}">{ikon_html}<div class="kpi-content"><div class="kpi-title">{label}</div><div class="kpi-number">{nilai}</div></div></div>'
+    kolom.markdown(html, unsafe_allow_html=True)
 
 def format_angka(x):
     return f"{x:,.0f}".replace(",", ".")
@@ -606,15 +595,7 @@ def halaman_beranda():
 
     col_kiri, col_kanan = st.columns(2)
     with col_kiri:
-        st.markdown("""
-        <div class="action-card">
-            <div class="action-header">
-                <div class="action-badge">⬇</div>
-                <h3 class="action-title">Template Data Excel</h3>
-            </div>
-            <p class="action-desc">Unduh template untuk memasukkan data produksi dan kecacatan sesuai format standar.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">⬇</div><h3 class="action-title">Template Data Excel</h3></div><p class="action-desc">Unduh template untuk memasukkan data produksi dan kecacatan sesuai format standar.</p></div>', unsafe_allow_html=True)
         st.download_button(
             "Download Template.xlsx",
             data=buat_template_excel(),
@@ -624,15 +605,7 @@ def halaman_beranda():
         )
 
     with col_kanan:
-        st.markdown("""
-        <div class="action-card">
-            <div class="action-header">
-                <div class="action-badge">☁</div>
-                <h3 class="action-title">Unggah Data</h3>
-            </div>
-            <p class="action-desc">Upload file Excel (.xlsx) yang sudah diisi sesuai template untuk memulai analisis.</p>
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">☁</div><h3 class="action-title">Unggah Data</h3></div><p class="action-desc">Upload file Excel (.xlsx) yang sudah diisi sesuai template untuk memulai analisis.</p></div>', unsafe_allow_html=True)
         file = st.file_uploader(
             "Pilih file Excel (.xlsx)",
             type=["xlsx", "xls"],
@@ -678,17 +651,9 @@ def halaman_overdispersi():
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if res["is_overdispersed"]:
-        st.markdown(f"""
-        <div class="interp-box interp-yellow">
-            Nilai Sigma Z = <b>{res['sigma_z']:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res['chart_type']}</b>.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="interp-box interp-yellow">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f"""
-        <div class="interp-box interp-blue">
-            Nilai Sigma Z = <b>{res['sigma_z']:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res['chart_type']}</b>.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown(f'<div class="interp-box interp-blue">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
 
     tabel = hasil_df[[
         "Subgrup", "Tanggal", "Jumlah Unit Diperiksa",
@@ -710,11 +675,7 @@ def halaman_peta_kendali():
     if st.session_state.riwayat_iterasi:
         col_info, col_reset = st.columns([4, 1])
         with col_info:
-            st.markdown(f"""
-            <div class="interp-box interp-blue">
-                Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.
-            </div>
-            """, unsafe_allow_html=True)
+            st.markdown(f'<div class="interp-box interp-blue">Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.</div>', unsafe_allow_html=True)
         with col_reset:
             if st.button("Reset ke Tahap 1", use_container_width=True):
                 st.session_state.riwayat_iterasi = []
@@ -795,17 +756,9 @@ def halaman_peta_kendali():
 
         if is_tahap_terakhir:
             if ooc.empty:
-                st.markdown(f"""
-                <div class="interp-box interp-blue">
-                    <b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res['jumlah_ic']} subgrup) berada di dalam batas kendali.
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f'<div class="interp-box interp-blue"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
             else:
-                st.markdown(f"""
-                <div class="interp-box interp-red">
-                    Masih ditemukan <b>{res['jumlah_ooc']} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{', '.join(ooc['Subgrup'].astype(str).tolist())}</b>.
-                </div>
-                """, unsafe_allow_html=True)
+                st.markdown(f'<div class="interp-box interp-red">Masih ditemukan <b>{res["jumlah_ooc"]} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{", ".join(ooc["Subgrup"].astype(str).tolist())}</b>.</div>', unsafe_allow_html=True)
                 ooc_tampil = ooc[["Subgrup", "Tanggal", "Jumlah Produk Cacat", "Jumlah Unit Diperiksa", "p_i", "BKA_Aktif", "BKB_Aktif"]].copy()
                 ooc_tampil["Tanggal"] = pd.to_datetime(ooc_tampil["Tanggal"]).dt.strftime("%Y-%m-%d")
                 st.dataframe(ooc_tampil, use_container_width=True, hide_index=True)
@@ -855,17 +808,9 @@ def halaman_runs_test():
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
-        st.markdown("""
-        <div class="interp-box interp-red">
-            <b>Keputusan (α = 0,05): Tolak H₀.</b> Data tidak menyebar secara acak.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-red"><b>Keputusan (α = 0,05): Tolak H₀.</b> Data tidak menyebar secara acak.</div>', unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div class="interp-box interp-blue">
-            <b>Keputusan (α = 0,05): Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-blue"><b>Keputusan (α = 0,05): Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak.</div>', unsafe_allow_html=True)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(
@@ -913,27 +858,11 @@ def halaman_kapabilitas():
     zp_teks = f"{z_p:.3f}".replace(".", ",")
 
     if ppk >= 1:
-        st.markdown("""
-        <div class="interp-box interp-blue">
-            <b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="interp-box interp-blue">
-            Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses sudah kapabel, sehingga perlu dipertahankan melalui pengendalian kualitas secara konsisten.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-blue"><b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="interp-box interp-blue">Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses sudah kapabel, sehingga perlu dipertahankan melalui pengendalian kualitas secara konsisten.</div>', unsafe_allow_html=True)
     else:
-        st.markdown("""
-        <div class="interp-box interp-red">
-            <b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b>
-        </div>
-        """, unsafe_allow_html=True)
-        st.markdown(f"""
-        <div class="interp-box interp-blue">
-            Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses belum kapabel, sehingga diperlukan perbaikan untuk menurunkan proporsi cacat dan meningkatkan kapabilitas proses.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-red"><b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b></div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="interp-box interp-blue">Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses belum kapabel, sehingga diperlukan perbaikan untuk menurunkan proporsi cacat dan meningkatkan kapabilitas proses.</div>', unsafe_allow_html=True)
 
 def halaman_level_sigma():
     render_header(judul="Level Sigma")
@@ -966,51 +895,12 @@ def halaman_level_sigma():
 
     col_interp, col_tabel = st.columns([1.15, 1])
     with col_interp:
-        st.markdown(f"""
-        <div class="interp-box interp-blue" style="height: 100%; display: flex; align-items: center;">
-            <div>
-                Hasil perhitungan menunjukkan nilai DPMO sebesar <b>{dpmo_teks}</b> dengan level sigma <b>{sigma_teks}</b>. Artinya, dari satu juta peluang terdapat sekitar <b>{peluang_bulat}</b> peluang terjadinya cacat. Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ), sehingga perlu dilakukan perbaikan untuk menurunkan jumlah cacat dan meningkatkan level sigma.
-            </div>
-        </div>
-        """, unsafe_allow_html=True)
+        html_interp = f'<div class="interp-box interp-blue" style="height: 100%; display: flex; align-items: center;"><div>Hasil perhitungan menunjukkan nilai DPMO sebesar <b>{dpmo_teks}</b> dengan level sigma <b>{sigma_teks}</b>. Artinya, dari satu juta peluang terdapat sekitar <b>{peluang_bulat}</b> peluang terjadinya cacat. Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ), sehingga perlu dilakukan perbaikan untuk menurunkan jumlah cacat dan meningkatkan level sigma.</div></div>'
+        st.markdown(html_interp, unsafe_allow_html=True)
 
     with col_tabel:
-        st.markdown("""
-        <table class="sigma-ref-table">
-            <thead>
-                <tr>
-                    <th>Level Sigma</th>
-                    <th>DPMO</th>
-                    <th>Keterangan</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>2 sigma</td>
-                    <td>508,538</td>
-                    <td rowspan="2">Rata-rata industri Indonesia</td>
-                </tr>
-                <tr>
-                    <td>3 sigma</td>
-                    <td>66,807</td>
-                </tr>
-                <tr>
-                    <td>4 sigma</td>
-                    <td>6,210</td>
-                    <td rowspan="2">Rata-rata industri USA</td>
-                </tr>
-                <tr>
-                    <td>5 sigma</td>
-                    <td>233</td>
-                </tr>
-                <tr>
-                    <td>6 sigma</td>
-                    <td>3,4</td>
-                    <td>Industri kelas dunia</td>
-                </tr>
-            </tbody>
-        </table>
-        """, unsafe_allow_html=True)
+        html_tabel = '<table class="sigma-ref-table"><thead><tr><th>Level Sigma</th><th>DPMO</th><th>Keterangan</th></tr></thead><tbody><tr><td>2 sigma</td><td>508,538</td><td rowspan="2">Rata-rata industri Indonesia</td></tr><tr><td>3 sigma</td><td>66,807</td></tr><tr><td>4 sigma</td><td>6,210</td><td rowspan="2">Rata-rata industri USA</td></tr><tr><td>5 sigma</td><td>233</td></tr><tr><td>6 sigma</td><td>3,4</td><td>Industri kelas dunia</td></tr></tbody></table>'
+        st.markdown(html_tabel, unsafe_allow_html=True)
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -1073,15 +963,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
 def halaman_fishbone():
     render_header(judul="Diagram Sebab-Akibat (Fishbone)")
 
-    st.markdown("""
-    <div class="action-card">
-        <div class="action-header">
-            <div class="action-badge">✎</div>
-            <h3 class="action-title">Input Penyebab Kecacatan (6M)</h3>
-        </div>
-        <p class="action-desc">Tuliskan akar penyebab pada masing-masing kategori di bawah ini (pisahkan dengan baris baru / Enter jika lebih dari satu penyebab). Hasil inputan akan otomatis membentuk gambar Diagram Fishbone dan diteruskan ke tabel FMEA.</p>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">✎</div><h3 class="action-title">Input Penyebab Kecacatan (6M)</h3></div><p class="action-desc">Tuliskan akar penyebab pada masing-masing kategori di bawah ini (pisahkan dengan baris baru / Enter jika lebih dari satu penyebab). Hasil inputan akan otomatis membentuk gambar Diagram Fishbone dan diteruskan ke tabel FMEA.</p></div>', unsafe_allow_html=True)
 
     masalah_utama = st.text_input(
         "Akibat / Masalah Utama (Kepala Ikan):",
@@ -1109,11 +991,7 @@ def halaman_fishbone():
     if st.button("Buat Gambar Diagram Fishbone & Simpan", use_container_width=True):
         st.session_state.fishbone_inputs = input_baru
         st.session_state.fishbone_generated = True
-        st.markdown("""
-        <div class="interp-box interp-blue">
-            Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.
-        </div>
-        """, unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-blue">Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.</div>', unsafe_allow_html=True)
 
     data_parsed = {}
     total_penyebab = 0
@@ -1140,30 +1018,27 @@ def kategori_prioritas_rpn(rpn):
 def halaman_fmea():
     render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
-    st.markdown("""
-    <div class="action-card">
-        <div class="action-header">
-            <div class="action-badge">i</div>
-            <h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3>
-        </div>
-        <div class="fmea-guide-text">
-            • <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>
-            • <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>
-            &nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>
-            &nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>
-            &nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>
-            &nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>
-            &nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>
-            • <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>
-            &nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>
-            &nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>
-            &nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>
-            &nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>
-            • <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>
-            &nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.
-        </div>
-    </div>
-    """, unsafe_allow_html=True)
+    panduan_html = (
+        '<div class="action-card">'
+        '<div class="action-header"><div class="action-badge">i</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
+        '<div class="fmea-guide-text">'
+        '• <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
+        '• <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>'
+        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>'
+        '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>'
+        '&nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.'
+        '</div></div>'
+    )
+    st.markdown(panduan_html, unsafe_allow_html=True)
 
     daftar_fishbone = []
     for kat, teks in st.session_state.fishbone_inputs.items():
@@ -1258,17 +1133,7 @@ MENU_ITEMS = {
 }
 
 with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-logo">
-        <div class="logo-bars">
-            <div class="bar-red"></div>
-            <div class="bar-orange"></div>
-            <div class="bar-yellow"></div>
-        </div>
-        <div class="logo-title">PT XYZ</div>
-        <div class="logo-sub">Building a Better Future</div>
-    </div>
-    """, unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-logo"><div class="logo-bars"><div class="bar-red"></div><div class="bar-orange"></div><div class="bar-yellow"></div></div><div class="logo-title">PT XYZ</div><div class="logo-sub">Building a Better Future</div></div>', unsafe_allow_html=True)
 
     pilihan_menu = st.radio("Navigasi", list(MENU_ITEMS.keys()), index=0)
 
