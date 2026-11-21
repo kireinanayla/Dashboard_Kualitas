@@ -919,12 +919,28 @@ def halaman_fishbone():
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
         st.plotly_chart(fig_fb, use_container_width=True)
 
-def kategori_prioritas_rpn(rpn):
-    if pd.isna(rpn):
-        return "-"
-    if rpn >= 50:
+# Kamus Skala Ketetapan Perusahaan untuk FMEA
+SKALA_SEVERITY = {
+    "Low (1)": 1,
+    "Medium (2)": 2,
+    "High (3)": 3,
+    "Extreme (4)": 4,
+    "Disaster (5)": 5
+}
+
+SKALA_OCCURRENCE = {
+    "Low (1)": 1,
+    "Medium (2)": 2,
+    "High (3)": 3,
+    "Extreme (4)": 4
+}
+
+def status_tindakan_rpn(rpn, rpn_maks):
+    if rpn == rpn_maks and rpn > 0:
+        return "🚨 Prioritas Utama (RPN Tertinggi — Segera Diperbaiki)"
+    elif rpn >= 9:
         return "🔴 Prioritas Tinggi (Segera Diperbaiki)"
-    elif rpn >= 25:
+    elif rpn >= 4:
         return "🟡 Prioritas Sedang (Perlu Pengendalian)"
     else:
         return "🟢 Prioritas Rendah (Pemantauan Rutin)"
@@ -932,20 +948,30 @@ def kategori_prioritas_rpn(rpn):
 def halaman_fmea():
     render_header(
         judul="Failure Mode and Effects Analysis (FMEA)",
-        subjudul="Penilaian Risiko & Penentuan Prioritas Perbaikan Berdasarkan Nilai RPN"
+        subjudul="Penilaian Risiko & Penentuan Prioritas Perbaikan Berdasarkan Standar Perusahaan"
     )
 
     st.markdown("""
     <div class="action-card">
         <div class="action-header">
             <div class="action-badge">ℹ</div>
-            <h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3>
+            <h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN (Ketetapan Perusahaan)</h3>
         </div>
         <p class="action-desc">
-            • <b>Failure Mode / Potensi Kegagalan</b> di bawah ini ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>
-            • <b>Severity (S) [Skala 1–10]:</b> Tingkat keparahan dampak kecacatan terhadap kualitas produk maupun proses produksi berikutnya (<i>1 = dampak sangat ringan/tidak terasa, 10 = dampak sangat fatal/produk ditolak total</i>).<br>
-            • <b>Occurrence (O) [Skala 1–10]:</b> Tingkat keseringan atau peluang munculnya penyebab kegagalan selama proses produksi (<i>1 = sangat jarang terjadi, 10 = hampir selalu terjadi</i>).<br>
-            • <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–100):</b> Semakin tinggi nilai RPN, semakin kritis risiko kegagalan tersebut dan harus menjadi <b>prioritas utama perbaikan</b> (<i>≥ 50: Prioritas Tinggi | 25–49: Prioritas Sedang | &lt; 25: Prioritas Rendah</i>).
+            • <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>
+            • <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>
+            &nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>
+            &nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>
+            &nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>
+            &nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>
+            &nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>
+            • <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>
+            &nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>
+            &nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>
+            &nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>
+            &nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>
+            • <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity &times; Occurrence, rentang 1–20):</b><br>
+            &nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -975,18 +1001,22 @@ def halaman_fmea():
     else:
         df_merged = df_base.copy()
         df_merged["Dampak Kegagalan"] = ""
-        df_merged["Severity"] = 1
-        df_merged["Occurrence"] = 1
+        df_merged["Severity"] = "Low (1)"
+        df_merged["Occurrence"] = "Low (1)"
         df_merged["Usulan Perbaikan"] = ""
 
     df_merged["Dampak Kegagalan"] = df_merged["Dampak Kegagalan"].fillna("")
-    df_merged["Severity"] = df_merged["Severity"].fillna(1).astype(int)
-    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).astype(int)
+    df_merged["Severity"] = df_merged["Severity"].where(df_merged["Severity"].isin(SKALA_SEVERITY.keys()), "Low (1)")
+    df_merged["Occurrence"] = df_merged["Occurrence"].where(df_merged["Occurrence"].isin(SKALA_OCCURRENCE.keys()), "Low (1)")
     df_merged["Usulan Perbaikan"] = df_merged["Usulan Perbaikan"].fillna("")
-    df_merged["RPN (S × O)"] = df_merged["Severity"] * df_merged["Occurrence"]
-    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
 
-    st.markdown("### Input Skor Severity & Occurrence")
+    skor_s = df_merged["Severity"].map(SKALA_SEVERITY).astype(int)
+    skor_o = df_merged["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
+    df_merged["RPN (S × O)"] = skor_s * skor_o
+    rpn_max_awal = int(df_merged["RPN (S × O)"].max()) if not df_merged.empty else 0
+    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_max_awal))
+
+    st.markdown("### Input Penilaian Severity & Occurrence")
     edited_fmea = st.data_editor(
         df_merged,
         use_container_width=True,
@@ -995,8 +1025,16 @@ def halaman_fmea():
             "Kategori (6M)": st.column_config.TextColumn("Kategori (6M)", disabled=True),
             "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn("Failure Mode / Penyebab Kegagalan", disabled=True),
             "Dampak Kegagalan": st.column_config.TextColumn("Dampak Kegagalan (Opsional)"),
-            "Severity": st.column_config.NumberColumn("Severity (1–10)", min_value=1, max_value=10, step=1, required=True),
-            "Occurrence": st.column_config.NumberColumn("Occurrence (1–10)", min_value=1, max_value=10, step=1, required=True),
+            "Severity": st.column_config.SelectboxColumn(
+                "Severity (S)",
+                options=list(SKALA_SEVERITY.keys()),
+                required=True
+            ),
+            "Occurrence": st.column_config.SelectboxColumn(
+                "Occurrence (O)",
+                options=list(SKALA_OCCURRENCE.keys()),
+                required=True
+            ),
             "RPN (S × O)": st.column_config.NumberColumn("RPN (S × O)", disabled=True),
             "Keterangan Prioritas": st.column_config.TextColumn("Keterangan Prioritas", disabled=True),
             "Usulan Perbaikan": st.column_config.TextColumn("Usulan Perbaikan")
@@ -1004,21 +1042,27 @@ def halaman_fmea():
         key="editor_fmea_otomatis"
     )
 
-    if st.button("⚡ Hitung Nilai RPN & Urutkan Prioritas", use_container_width=True):
+    if st.button("⚡ Hitung Nilai RPN & Urutkan Prioritas Tertinggi", use_container_width=True):
         hasil = edited_fmea.copy()
-        hasil["RPN (S × O)"] = hasil["Severity"].astype(int) * hasil["Occurrence"].astype(int)
-        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(kategori_prioritas_rpn)
+        s_val = hasil["Severity"].map(SKALA_SEVERITY).astype(int)
+        o_val = hasil["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
+        hasil["RPN (S × O)"] = s_val * o_val
+        rpn_maks = int(hasil["RPN (S × O)"].max()) if not hasil.empty else 0
+        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_maks))
         st.session_state.fmea_scores = hasil
         st.rerun()
 
     hasil_akhir = edited_fmea.copy()
-    hasil_akhir["RPN (S × O)"] = hasil_akhir["Severity"].astype(int) * hasil_akhir["Occurrence"].astype(int)
-    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    s_final = hasil_akhir["Severity"].map(SKALA_SEVERITY).astype(int)
+    o_final = hasil_akhir["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
+    hasil_akhir["RPN (S × O)"] = s_final * o_final
+    rpn_tertinggi = int(hasil_akhir["RPN (S × O)"].max()) if not hasil_akhir.empty else 0
+    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_tertinggi))
     hasil_akhir = hasil_akhir.sort_values("RPN (S × O)", ascending=False).reset_index(drop=True)
     hasil_akhir.insert(0, "Peringkat", np.arange(1, len(hasil_akhir) + 1))
 
     st.markdown("---")
-    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)")
+    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari Nilai RPN Tertinggi)")
     st.dataframe(hasil_akhir, use_container_width=True, hide_index=True)
 
     out_fmea = io.BytesIO()
