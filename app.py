@@ -164,15 +164,14 @@ st.markdown(f"""
 .kpi-box {{
     background: {PUTIH};
     border-radius: 16px;
-    padding: 20px 22px;
+    padding: 18px 18px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.04);
     border: 1px solid #ECEEF2;
     position: relative;
-    overflow: hidden;
-    min-height: 108px;
+    min-height: 104px;
 }}
 .kpi-box.accent-red::after {{
     content: "";
@@ -216,10 +215,11 @@ st.markdown(f"""
     margin-bottom: 2px;
 }}
 .kpi-number {{
-    font-size: 28px;
+    font-size: 22px;
     font-weight: 850;
     color: {HITAM};
-    line-height: 1.1;
+    line-height: 1.15;
+    word-break: break-word;
 }}
 
 /* Kartu Putih Umum */
@@ -768,7 +768,7 @@ def halaman_kapabilitas():
     render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.latex(r"P\%_{pk} = \frac{Z(\bar{p})}{3}")
+    st.latex(r"P\%_{pk} = rac{Z(ar{p})}{3}")
     if ppk >= 1:
         st.success("Interpretasi berdasarkan batas P%pk ≥ 1: proses kapabel.")
     else:
@@ -779,13 +779,14 @@ def halaman_level_sigma():
         judul="Level Sigma",
         subjudul="Perhitungan DPO, DPMO, dan Nilai Sigma Proses Produksi"
     )
-    dasar, aktif = get_data_aktif()
+    dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    total_cacat = int(aktif["Jumlah Produk Cacat"].sum())
-    total_unit = int(aktif["Jumlah Unit Diperiksa"].sum())
+    # Menggunakan seluruh data produksi awal (Fase I) sesuai perhitungan di Excel
+    total_cacat = int(dasar["Jumlah Produk Cacat"].sum())
+    total_unit = int(dasar["Jumlah Unit Diperiksa"].sum())
 
     try:
         dpo, dpmo, sigma = hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5)
@@ -800,9 +801,10 @@ def halaman_level_sigma():
     render_kpi(d, "Σ", "icon-red", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
-    st.latex(r"DPMO = DPO \times 10^6")
-    st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
+    st.latex(r"DPO = rac{	ext{Jumlah cacat}}{	ext{Unit diperiksa} 	imes 	ext{Peluang per unit}}")
+    st.latex(r"DPMO = DPO 	imes 10^6")
+    st.latex(r"	ext{Level Sigma} = \Phi^{-1}\left(1-rac{DPMO}{10^6}
+ight)+1{,}5")
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -909,7 +911,8 @@ def halaman_fishbone():
     data_parsed = {}
     total_penyebab = 0
     for kat in kategori_list:
-        baris = [b.strip() for b in st.session_state.fishbone_inputs.get(kat, "").split("\n") if b.strip()]
+        baris = [b.strip() for b in st.session_state.fishbone_inputs.get(kat, "").split("
+") if b.strip()]
         data_parsed[kat] = baris
         total_penyebab += len(baris)
 
@@ -951,7 +954,8 @@ def halaman_fmea():
 
     daftar_fishbone = []
     for kat, teks in st.session_state.fishbone_inputs.items():
-        for baris in teks.split("\n"):
+        for baris in teks.split("
+"):
             if baris.strip():
                 daftar_fishbone.append({
                     "Kategori (6M)": kat.split(" ")[0],
