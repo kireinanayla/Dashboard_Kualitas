@@ -768,7 +768,7 @@ def halaman_kapabilitas():
     render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.latex(r"P\%_{pk} = rac{Z(ar{p})}{3}")
+    st.latex(r"P\%_{pk} = \frac{Z(\bar{p})}{3}")
     if ppk >= 1:
         st.success("Interpretasi berdasarkan batas P%pk ≥ 1: proses kapabel.")
     else:
@@ -801,10 +801,9 @@ def halaman_level_sigma():
     render_kpi(d, "Σ", "icon-red", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    st.latex(r"DPO = rac{	ext{Jumlah cacat}}{	ext{Unit diperiksa} 	imes 	ext{Peluang per unit}}")
-    st.latex(r"DPMO = DPO 	imes 10^6")
-    st.latex(r"	ext{Level Sigma} = \Phi^{-1}\left(1-rac{DPMO}{10^6}
-ight)+1{,}5")
+    st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
+    st.latex(r"DPMO = DPO \times 10^6")
+    st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -911,8 +910,7 @@ def halaman_fishbone():
     data_parsed = {}
     total_penyebab = 0
     for kat in kategori_list:
-        baris = [b.strip() for b in st.session_state.fishbone_inputs.get(kat, "").split("
-") if b.strip()]
+        baris = [b.strip() for b in st.session_state.fishbone_inputs.get(kat, "").split("\n") if b.strip()]
         data_parsed[kat] = baris
         total_penyebab += len(baris)
 
@@ -954,8 +952,7 @@ def halaman_fmea():
 
     daftar_fishbone = []
     for kat, teks in st.session_state.fishbone_inputs.items():
-        for baris in teks.split("
-"):
+        for baris in teks.split("\n"):
             if baris.strip():
                 daftar_fishbone.append({
                     "Kategori (6M)": kat.split(" ")[0],
