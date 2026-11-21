@@ -12,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 5 Warna Solid Sesuai Desain Referensi PT XYZ
+# Palet Warna 5 Warna Solid
 MERAH = "#D71920"
 KUNING = "#F5C518"
 HITAM = "#1A1C20"
@@ -33,29 +33,30 @@ st.markdown(f"""
     max-width: 1380px;
 }}
 
-/* Sidebar dengan Header Putih & Body Hitam */
+/* Kunci Sidebar agar Tidak Bisa Di-scroll Atas-Bawah */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 135px, {HITAM} 135px, {HITAM} 100%);
+    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 74px, {HITAM} 74px, {HITAM} 100%) !important;
     border-right: 1px solid #E5E7EB;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
 }}
-[data-testid="stSidebar"] > div:first-child {{
-    padding-top: 1rem;
+[data-testid="stSidebar"] > div:first-child,
+[data-testid="stSidebarContent"],
+[data-testid="stSidebarUserContent"] {{
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
+    padding-top: 0.75rem !important;
+    padding-bottom: 0.75rem !important;
 }}
 
-/* Logo Box di Sidebar */
+/* Header PT XYZ Tanpa Logo & Tanpa Subjudul */
 .sidebar-logo {{
     text-align: center;
-    padding: 4px 10px 18px 10px;
-    margin-bottom: 12px;
+    padding: 6px 10px 14px 10px;
+    margin-bottom: 10px;
 }}
-.logo-bars {{
-    display: inline-flex;
-    gap: 5px;
-    margin-bottom: 4px;
-}}
-.bar-red {{ width: 14px; height: 26px; background: {MERAH}; transform: skewX(-22deg); border-radius: 2px; }}
-.bar-orange {{ width: 14px; height: 26px; background: #F05A22; transform: skewX(-22deg); border-radius: 2px; }}
-.bar-yellow {{ width: 14px; height: 26px; background: {KUNING}; transform: skewX(-22deg); border-radius: 2px; }}
 .logo-title {{
     font-size: 22px;
     font-weight: 900;
@@ -63,26 +64,22 @@ st.markdown(f"""
     letter-spacing: 0.5px;
     line-height: 1.1;
 }}
-.logo-sub {{
-    font-size: 10.5px;
-    font-weight: 600;
-    color: {ABU_TEKS} !important;
-}}
 
-/* Menu Radio di Sidebar */
+/* Menu Radio Rapat & Tanpa Bulatan Radio */
 [data-testid="stSidebar"] .stRadio > label {{
-    display: none;
+    display: none !important;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] {{
-    gap: 6px;
+    gap: 4px !important;
     padding: 0 8px;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label {{
     background-color: transparent;
-    border-radius: 10px;
-    padding: 10px 14px;
+    border-radius: 9px;
+    padding: 8px 14px !important;
     transition: all 0.2s ease;
     border: 1px solid transparent;
+    width: 100%;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label p {{
     color: #E5E7EB !important;
@@ -102,13 +99,14 @@ st.markdown(f"""
     color: {PUTIH} !important;
     font-weight: 700 !important;
 }}
-[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child {{
-    display: none;
+[data-testid="stSidebar"] div[role="radiogroup"] label > div:first-child,
+[data-testid="stSidebar"] div[role="radiogroup"] input[type="radio"] {{
+    display: none !important;
 }}
 
 /* Dekorasi garis merah-kuning di bawah sidebar */
 .sidebar-accent {{
-    margin-top: 28px;
+    margin-top: 18px;
     height: 10px;
     background: linear-gradient(90deg, {MERAH} 0%, {MERAH} 65%, {KUNING} 65%, {KUNING} 100%);
     border-radius: 4px;
@@ -150,20 +148,22 @@ st.markdown(f"""
     box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }}
 
-/* Kartu KPI Seragam (Tanpa gradasi pink) */
+/* Kartu KPI Fleksibel & Responsif (Anti Terpotong) */
 .kpi-box {{
     background: {PUTIH};
     border-radius: 16px;
-    padding: 22px 24px;
+    padding: 18px 20px;
     display: flex;
     align-items: center;
-    gap: 18px;
+    gap: 14px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.04);
     border: 1px solid #ECEEF2;
     position: relative;
     overflow: hidden;
-    height: 112px;
+    min-height: 115px;
+    height: 100%;
     width: 100%;
+    box-sizing: border-box;
 }}
 .kpi-box.accent-red::after {{
     content: "";
@@ -194,13 +194,13 @@ st.markdown(f"""
     background-color: {BIRU};
 }}
 .kpi-icon {{
-    width: 50px;
-    height: 50px;
+    width: 44px;
+    height: 44px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 21px;
+    font-size: 18px;
     font-weight: 800;
     color: {PUTIH};
     flex-shrink: 0;
@@ -213,18 +213,21 @@ st.markdown(f"""
     flex: 1;
 }}
 .kpi-title {{
-    font-size: 13.5px;
+    font-size: 13px;
     font-weight: 650;
     color: {ABU_TEKS};
     margin-bottom: 4px;
-    white-space: nowrap;
+    line-height: 1.3;
+    white-space: normal;
+    word-wrap: break-word;
 }}
 .kpi-number {{
-    font-size: 26px;
+    font-size: clamp(18px, 1.45vw, 24px);
     font-weight: 850;
     color: {HITAM};
-    line-height: 1.15;
-    white-space: nowrap;
+    line-height: 1.2;
+    white-space: normal;
+    overflow-wrap: anywhere;
 }}
 
 /* Kartu Putih Umum & Kotak Interpretasi Palet 5 Warna */
@@ -401,16 +404,24 @@ def format_angka(x):
     return f"{x:,.0f}".replace(",", ".")
 
 def style_plotly_excel(fig):
-    """Gaya grafik bersih ala Excel dengan teks hitam pekat dan tanpa garis grid vertikal."""
+    """Gaya grafik bersih ala Excel dengan jarak judul dan legenda yang lega."""
     fig.update_layout(
         paper_bgcolor=PUTIH,
         plot_bgcolor=PUTIH,
         font=dict(color=HITAM, size=12),
-        title=dict(font=dict(color=HITAM, size=16)),
-        margin=dict(l=35, r=25, t=60, b=35),
+        title=dict(
+            font=dict(color=HITAM, size=16),
+            x=0,
+            y=0.96,
+            yanchor="top"
+        ),
+        margin=dict(l=40, r=25, t=95, b=40),
         legend=dict(
             orientation="h",
-            y=1.12,
+            x=0,
+            xanchor="left",
+            y=1.08,
+            yanchor="bottom",
             font=dict(color=HITAM, size=12)
         )
     )
@@ -1133,7 +1144,7 @@ MENU_ITEMS = {
 }
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-logo"><div class="logo-bars"><div class="bar-red"></div><div class="bar-orange"></div><div class="bar-yellow"></div></div><div class="logo-title">PT XYZ</div><div class="logo-sub">Building a Better Future</div></div>', unsafe_allow_html=True)
+    st.markdown('<div class="sidebar-logo"><div class="logo-title">PT XYZ</div></div>', unsafe_allow_html=True)
 
     pilihan_menu = st.radio("Navigasi", list(MENU_ITEMS.keys()), index=0)
 
