@@ -419,9 +419,9 @@ def hitung_peta_kendali(df_input):
         raise ValueError("Simpangan baku proporsi bernilai nol; periksa proporsi cacat.")
     df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
 
-    df = df.sort_values("Subgrup").copy()
-    selisih_subgrup = df["Subgrup"].diff()
-    df["R_i"] = df["z_i"].diff().abs().where(selisih_subgrup == 1)
+    # Moving range dihitung berurutan dari baris yang tersisa (persis seperti tabel revisi di Excel)
+    df = df.sort_values("Subgrup").reset_index(drop=True)
+    df["R_i"] = df["z_i"].diff().abs()
     valid_mr = df["R_i"].dropna()
     R_bar = float(valid_mr.mean()) if len(valid_mr) else 0.0
     sigma_z = R_bar / 1.128
