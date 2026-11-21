@@ -2,7 +2,6 @@ import io
 import numpy as np
 import pandas as pd
 import streamlit as st
-import plotly.express as px
 import plotly.graph_objects as go
 from scipy.stats import norm
 
@@ -13,7 +12,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna Sesuai Desain Referensi PT XYZ
+# Palet Warna 5 Warna Solid Sesuai Desain Referensi PT XYZ
 MERAH = "#D71920"
 KUNING = "#F5C518"
 HITAM = "#1A1C20"
@@ -34,7 +33,7 @@ st.markdown(f"""
     max-width: 1380px;
 }}
 
-/* Sidebar dengan Header Putih & Body Gelap */
+/* Sidebar dengan Header Putih & Body Hitam */
 [data-testid="stSidebar"] {{
     background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 135px, {HITAM} 135px, {HITAM} 100%);
     border-right: 1px solid #E5E7EB;
@@ -115,26 +114,18 @@ st.markdown(f"""
     border-radius: 4px;
 }}
 
-/* Header Banner Utama */
+/* Header Banner Utama (Tanpa garis vertikal & tanpa subjudul) */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: linear-gradient(120deg, {PUTIH} 65%, #ECEEF2 100%);
-    padding: 20px 26px;
+    background: {PUTIH};
+    padding: 22px 28px;
     border-radius: 16px;
     box-shadow: 0 2px 10px rgba(0,0,0,0.03);
+    border: 1px solid #ECEEF2;
     margin-bottom: 22px;
-}}
-.header-left {{
-    display: flex;
-    align-items: stretch;
     gap: 16px;
-}}
-.header-stripe {{
-    width: 6px;
-    border-radius: 4px;
-    background: linear-gradient(180deg, {MERAH} 0%, {MERAH} 65%, {KUNING} 65%, {KUNING} 100%);
 }}
 .header-title {{
     font-size: 30px;
@@ -143,90 +134,104 @@ st.markdown(f"""
     margin: 0;
     line-height: 1.15;
 }}
-.header-subtitle {{
-    font-size: 15px;
-    font-style: italic;
-    color: {ABU_TEKS};
-    margin: 4px 0 0 0;
-}}
 .period-badge {{
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
     background: {PUTIH};
-    border: 1px solid #E2E5EC;
+    border: 1px solid #D1D5DB;
     border-radius: 10px;
-    padding: 8px 16px;
-    font-size: 13px;
-    font-weight: 650;
+    padding: 9px 16px;
+    font-size: 13.5px;
+    font-weight: 700;
     color: {HITAM};
-    box-shadow: 0 2px 6px rgba(0,0,0,0.04);
+    white-space: nowrap;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(0,0,0,0.03);
 }}
 
-/* Kartu KPI */
+/* Kartu KPI Seragam (Tanpa gradasi pink) */
 .kpi-box {{
     background: {PUTIH};
     border-radius: 16px;
-    padding: 18px 18px;
+    padding: 22px 24px;
     display: flex;
     align-items: center;
-    gap: 14px;
+    gap: 18px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.04);
     border: 1px solid #ECEEF2;
     position: relative;
-    min-height: 104px;
+    overflow: hidden;
+    height: 112px;
+    width: 100%;
 }}
 .kpi-box.accent-red::after {{
     content: "";
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, {MERAH} 0%, #F48FB1 100%);
+    background-color: {MERAH};
 }}
 .kpi-box.accent-yellow::after {{
     content: "";
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, {KUNING} 0%, #FDE68A 100%);
+    background-color: {KUNING};
 }}
 .kpi-box.accent-dark::after {{
     content: "";
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 6px;
-    background: linear-gradient(90deg, {HITAM} 0%, #6B7280 100%);
+    background-color: {HITAM};
+}}
+.kpi-box.accent-blue::after {{
+    content: "";
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 6px;
+    background-color: {BIRU};
 }}
 .kpi-icon {{
-    width: 52px;
-    height: 52px;
+    width: 50px;
+    height: 50px;
     border-radius: 50%;
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 22px;
+    font-size: 21px;
     font-weight: 800;
     color: {PUTIH};
     flex-shrink: 0;
 }}
 .icon-dark {{ background-color: {HITAM}; }}
 .icon-red {{ background-color: {MERAH}; }}
+.icon-blue {{ background-color: {BIRU}; }}
+.kpi-content {{
+    min-width: 0;
+    flex: 1;
+}}
 .kpi-title {{
     font-size: 13.5px;
-    font-weight: 600;
+    font-weight: 650;
     color: {ABU_TEKS};
-    margin-bottom: 2px;
+    margin-bottom: 4px;
+    white-space: nowrap;
 }}
 .kpi-number {{
-    font-size: 22px;
+    font-size: 26px;
     font-weight: 850;
     color: {HITAM};
     line-height: 1.15;
-    word-break: break-word;
+    white-space: nowrap;
 }}
 
-/* Kartu Putih Umum */
+/* Kartu Putih Umum & Kotak Interpretasi Palet 5 Warna */
 .action-card {{
     background: {PUTIH};
     border-radius: 16px;
-    padding: 20px 24px 12px 24px;
+    padding: 20px 24px 16px 24px;
     box-shadow: 0 3px 12px rgba(0,0,0,0.04);
     border: 1px solid #ECEEF2;
     margin-bottom: 12px;
@@ -235,19 +240,20 @@ st.markdown(f"""
     display: flex;
     align-items: center;
     gap: 12px;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
 }}
 .action-badge {{
-    width: 34px;
-    height: 34px;
+    width: 32px;
+    height: 32px;
     border-radius: 50%;
     background-color: {MERAH};
     color: {PUTIH};
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 15px;
     font-weight: bold;
+    flex-shrink: 0;
 }}
 .action-title {{
     font-size: 18px;
@@ -257,11 +263,67 @@ st.markdown(f"""
 }}
 .action-desc {{
     font-size: 13.5px;
-    color: {ABU_TEKS};
-    margin-bottom: 12px;
+    color: {HITAM};
+    margin-bottom: 8px;
+    line-height: 1.55;
+}}
+.fmea-guide-text {{
+    font-size: 12.5px;
+    color: {HITAM};
+    line-height: 1.55;
+    margin-bottom: 4px;
 }}
 
-/* Perbaikan Kontras Input Label & Text Area agar Terbaca Jelas */
+/* Kotak Interpretasi Sesuai Palet (Putih, Hitam, Merah, Biru, Kuning) */
+.interp-box {{
+    background: {PUTIH};
+    border-radius: 12px;
+    padding: 16px 20px;
+    color: {HITAM};
+    font-size: 14.5px;
+    line-height: 1.6;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    border: 1px solid #E5E7EB;
+    margin-bottom: 12px;
+}}
+.interp-red {{
+    border-left: 6px solid {MERAH};
+}}
+.interp-blue {{
+    border-left: 6px solid {BIRU};
+}}
+.interp-yellow {{
+    border-left: 6px solid {KUNING};
+}}
+
+/* Tabel Referensi Standar Level Sigma */
+.sigma-ref-table {{
+    width: 100%;
+    border-collapse: collapse;
+    background: {PUTIH};
+    color: {HITAM};
+    font-size: 13.5px;
+    border: 1px solid #D1D5DB;
+    border-radius: 10px;
+    overflow: hidden;
+}}
+.sigma-ref-table th {{
+    background-color: #F3F4F6;
+    color: {HITAM};
+    font-weight: 800;
+    padding: 10px 12px;
+    border: 1px solid #D1D5DB;
+    text-align: center;
+}}
+.sigma-ref-table td {{
+    padding: 9px 12px;
+    border: 1px solid #D1D5DB;
+    color: {HITAM};
+    text-align: center;
+    vertical-align: middle;
+}}
+
+/* Perbaikan Kontras Input Label, Text Area, & Placeholder */
 label, .stTextArea label, .stTextInput label, .stSelectbox label, .stNumberInput label {{
     color: {HITAM} !important;
     font-weight: 700 !important;
@@ -269,15 +331,21 @@ label, .stTextArea label, .stTextInput label, .stSelectbox label, .stNumberInput
 textarea, input {{
     background-color: {PUTIH} !important;
     color: {HITAM} !important;
+    -webkit-text-fill-color: {HITAM} !important;
+}}
+textarea::placeholder, input::placeholder {{
+    color: #4B5563 !important;
+    -webkit-text-fill-color: #4B5563 !important;
+    opacity: 1 !important;
 }}
 
-/* Tombol Merah */
+/* Tombol Utama Merah Solid */
 div.stButton > button, div.stDownloadButton > button {{
     background-color: {MERAH} !important;
     color: {PUTIH} !important;
     border: none !important;
     border-radius: 10px !important;
-    padding: 0.6rem 1.2rem !important;
+    padding: 0.65rem 1.2rem !important;
     font-weight: 700 !important;
     box-shadow: 0 3px 8px rgba(215, 25, 32, 0.25);
 }}
@@ -310,7 +378,9 @@ if "fishbone_generated" not in st.session_state:
 if "fmea_scores" not in st.session_state:
     st.session_state.fmea_scores = pd.DataFrame()
 
-def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"):
+CALENDAR_SVG = """<svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>"""
+
+def render_header(judul="Six Sigma Dashboard"):
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
         tgl_awal = df["Tanggal"].min().strftime("%b %Y")
@@ -321,22 +391,17 @@ def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produ
 
     st.markdown(f"""
     <div class="dashboard-header">
-        <div class="header-left">
-            <div class="header-stripe"></div>
-            <div>
-                <h1 class="header-title">{judul}</h1>
-                <p class="header-subtitle">{subjudul}</p>
-            </div>
-        </div>
-        <div class="period-badge">📅 Periode Analisis: {periode_teks}</div>
+        <h1 class="header-title">{judul}</h1>
+        <div class="period-badge">{CALENDAR_SVG} <span>Periode Analisis: {periode_teks}</span></div>
     </div>
     """, unsafe_allow_html=True)
 
 def render_kpi(kolom, ikon, warna_ikon, aksen_bawah, label, nilai):
+    ikon_html = f'<div class="kpi-icon {warna_ikon}">{ikon}</div>' if ikon else ""
     kolom.markdown(f"""
     <div class="kpi-box {aksen_bawah}">
-        <div class="kpi-icon {warna_ikon}">{ikon}</div>
-        <div>
+        {ikon_html}
+        <div class="kpi-content">
             <div class="kpi-title">{label}</div>
             <div class="kpi-number">{nilai}</div>
         </div>
@@ -346,15 +411,38 @@ def render_kpi(kolom, ikon, warna_ikon, aksen_bawah, label, nilai):
 def format_angka(x):
     return f"{x:,.0f}".replace(",", ".")
 
-def style_plotly(fig):
+def style_plotly_excel(fig):
+    """Gaya grafik bersih ala Excel dengan teks hitam pekat dan tanpa garis grid vertikal."""
     fig.update_layout(
-        paper_bgcolor=PUTIH, plot_bgcolor=PUTIH,
-        font=dict(color=HITAM),
-        margin=dict(l=25, r=20, t=55, b=25),
-        legend=dict(orientation="h", y=1.12)
+        paper_bgcolor=PUTIH,
+        plot_bgcolor=PUTIH,
+        font=dict(color=HITAM, size=12),
+        title=dict(font=dict(color=HITAM, size=16)),
+        margin=dict(l=35, r=25, t=60, b=35),
+        legend=dict(
+            orientation="h",
+            y=1.12,
+            font=dict(color=HITAM, size=12)
+        )
     )
-    fig.update_xaxes(showgrid=True, gridcolor="#E5E7EB")
-    fig.update_yaxes(showgrid=True, gridcolor="#E5E7EB")
+    fig.update_xaxes(
+        showgrid=False,
+        showline=True,
+        linecolor=HITAM,
+        linewidth=1,
+        tickfont=dict(color=HITAM),
+        title_font=dict(color=HITAM)
+    )
+    fig.update_yaxes(
+        showgrid=True,
+        gridcolor="#D1D5DB",
+        gridwidth=1,
+        showline=True,
+        linecolor=HITAM,
+        linewidth=1,
+        tickfont=dict(color=HITAM),
+        title_font=dict(color=HITAM)
+    )
     return fig
 
 KOLOM_WAJIB = ["Tanggal", "Jumlah Produk Cacat", "Jumlah Unit Diperiksa"]
@@ -405,7 +493,6 @@ def get_data_aktif():
     return dasar, aktif
 
 def hitung_peta_kendali(df_input):
-    """Menghitung batas kendali P-Chart dan Laney P' sesuai rumus Excel skripsi."""
     df = df_input.copy()
     if len(df) < 2:
         raise ValueError("Minimal diperlukan dua subgrup untuk menghitung moving range.")
@@ -419,7 +506,6 @@ def hitung_peta_kendali(df_input):
         raise ValueError("Simpangan baku proporsi bernilai nol; periksa proporsi cacat.")
     df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
 
-    # Moving range dihitung berurutan dari baris yang tersisa (persis seperti tabel revisi di Excel)
     df = df.sort_values("Subgrup").reset_index(drop=True)
     df["R_i"] = df["z_i"].diff().abs()
     valid_mr = df["R_i"].dropna()
@@ -499,10 +585,7 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
     return dpo, dpmo, sigma
 
 def halaman_beranda():
-    render_header(
-        judul="Six Sigma Dashboard",
-        subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"
-    )
+    render_header(judul="Six Sigma Dashboard")
 
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
@@ -515,9 +598,9 @@ def halaman_beranda():
         persen = 0.0
 
     k1, k2, k3 = st.columns(3)
-    render_kpi(k1, "📦", "icon-dark", "accent-red", "Total Unit Diperiksa", format_angka(total_unit))
-    render_kpi(k2, "❗", "icon-red", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(k3, "%", "icon-dark", "accent-yellow", "Persentase Cacat", f"{persen:.2f}%")
+    render_kpi(k1, None, "", "accent-red", "Total Unit Diperiksa", format_angka(total_unit))
+    render_kpi(k2, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(k3, None, "", "accent-yellow", "Persentase Cacat", f"{persen:.2f}%")
 
     st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
@@ -533,7 +616,7 @@ def halaman_beranda():
         </div>
         """, unsafe_allow_html=True)
         st.download_button(
-            "⬇️ Download Template.xlsx",
+            "Download Template.xlsx",
             data=buat_template_excel(),
             file_name="Template_Data_Produksi_AAC.xlsx",
             mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
@@ -576,10 +659,7 @@ def halaman_beranda():
         st.dataframe(tampil, use_container_width=True, hide_index=True)
 
 def halaman_overdispersi():
-    render_header(
-        judul="Identifikasi Overdispersi",
-        subjudul="Evaluasi Kondisi Overdispersi & Pemilihan Jenis Peta Kendali"
-    )
+    render_header(judul="Identifikasi Overdispersi")
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -591,16 +671,24 @@ def halaman_overdispersi():
         return
 
     a, b, c, d = st.columns(4)
-    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
-    render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
-    render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
-    render_kpi(d, "✓", "icon-red", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
+    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi", f"{res['p_bar']:.4f}")
+    render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range", f"{res['R_bar']:.4f}")
+    render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z", f"{res['sigma_z']:.4f}")
+    render_kpi(d, "✓", "icon-red", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Normal")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if res["is_overdispersed"]:
-        st.warning(f"Nilai Sigma Z = **{res['sigma_z']:.4f} > 1**, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: **{res['chart_type']}**.")
+        st.markdown(f"""
+        <div class="interp-box interp-yellow">
+            Nilai Sigma Z = <b>{res['sigma_z']:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res['chart_type']}</b>.
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.success(f"Nilai Sigma Z = **{res['sigma_z']:.4f} ≤ 1**, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: **{res['chart_type']}**.")
+        st.markdown(f"""
+        <div class="interp-box interp-blue">
+            Nilai Sigma Z = <b>{res['sigma_z']:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res['chart_type']}</b>.
+        </div>
+        """, unsafe_allow_html=True)
 
     tabel = hasil_df[[
         "Subgrup", "Tanggal", "Jumlah Unit Diperiksa",
@@ -611,10 +699,7 @@ def halaman_overdispersi():
     st.dataframe(tabel, use_container_width=True, hide_index=True)
 
 def halaman_peta_kendali():
-    render_header(
-        judul="Analisis Peta Kendali",
-        subjudul="Pemantauan & Revisi Bertahap Hingga Seluruh Subgrup In Control"
-    )
+    render_header(judul="Analisis Peta Kendali")
     if st.session_state.df_produksi is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
@@ -625,9 +710,13 @@ def halaman_peta_kendali():
     if st.session_state.riwayat_iterasi:
         col_info, col_reset = st.columns([4, 1])
         with col_info:
-            st.info(f"Menampilkan **{len(st.session_state.riwayat_iterasi) + 1} tahap** analisis peta kendali.")
+            st.markdown(f"""
+            <div class="interp-box interp-blue">
+                Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.
+            </div>
+            """, unsafe_allow_html=True)
         with col_reset:
-            if st.button("🔄 Reset ke Tahap 1", use_container_width=True):
+            if st.button("Reset ke Tahap 1", use_container_width=True):
                 st.session_state.riwayat_iterasi = []
                 st.session_state.excluded_subgroups = []
                 st.rerun()
@@ -655,24 +744,49 @@ def halaman_peta_kendali():
             break
 
         a, b, c = st.columns(3)
-        render_kpi(a, "📈", "icon-dark", "accent-dark", f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
-        render_kpi(b, "—", "icon-dark", "accent-yellow", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
-        render_kpi(c, "⚠", "icon-red", "accent-red", "Subgrup Out of Control", str(res["jumlah_ooc"]))
+        render_kpi(a, None, "", "accent-dark", f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
+        render_kpi(b, None, "", "accent-yellow", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
+        render_kpi(c, None, "", "accent-red", "Subgrup Out of Control", str(res["jumlah_ooc"]))
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"], mode="lines", name="BKA", line=dict(color=MERAH, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=BIRU, width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"], mode="lines", name="BKB", line=dict(color=KUNING, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat (pi)", line=dict(color=HITAM), marker=dict(size=7)))
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"],
+            mode="lines", name="BKA",
+            line=dict(color=MERAH, dash="solid", width=2)
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"], y=df_ctrl["CL"],
+            mode="lines", name="CL",
+            line=dict(color=BIRU, dash="solid", width=2)
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"],
+            mode="lines", name="BKB",
+            line=dict(color=KUNING, dash="solid", width=2)
+        ))
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"], y=df_ctrl["p_i"],
+            mode="lines+markers", name="Proporsi cacat (pi)",
+            line=dict(color=HITAM, width=2),
+            marker=dict(color=HITAM, size=6)
+        ))
 
         ooc = df_ctrl[df_ctrl["Status_OOC"]]
         if not ooc.empty:
-            fig.add_trace(go.Scatter(x=ooc["Subgrup"], y=ooc["p_i"], mode="markers", name="Out of Control", marker=dict(color=MERAH, size=12, symbol="diamond")))
+            fig.add_trace(go.Scatter(
+                x=ooc["Subgrup"], y=ooc["p_i"],
+                mode="markers", name="Out of Control",
+                marker=dict(color=MERAH, size=10, symbol="diamond")
+            ))
 
-        fig.update_layout(title=f"{res['chart_type']} — Tahap {tahap_ke}", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
-        st.plotly_chart(style_plotly(fig), use_container_width=True)
+        fig.update_layout(
+            title=f"{res['chart_type']} — Tahap {tahap_ke}",
+            xaxis_title="Subgrup",
+            yaxis_title="Proporsi cacat"
+        )
+        st.plotly_chart(style_plotly_excel(fig), use_container_width=True)
 
         with st.expander(f"Lihat Tabel Perhitungan Peta Kendali Tahap {tahap_ke}", expanded=is_tahap_terakhir):
             tampil_ctrl = df_ctrl.copy()
@@ -681,9 +795,17 @@ def halaman_peta_kendali():
 
         if is_tahap_terakhir:
             if ooc.empty:
-                st.success(f"✅ **Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}!** Seluruh subgrup ({res['jumlah_ic']} subgrup) berada di dalam batas kendali.")
+                st.markdown(f"""
+                <div class="interp-box interp-blue">
+                    <b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res['jumlah_ic']} subgrup) berada di dalam batas kendali.
+                </div>
+                """, unsafe_allow_html=True)
             else:
-                st.warning(f"⚠️ Masih ditemukan **{res['jumlah_ooc']} subgrup Out of Control** pada Tahap {tahap_ke}: Subgrup **{', '.join(ooc['Subgrup'].astype(str).tolist())}**.")
+                st.markdown(f"""
+                <div class="interp-box interp-red">
+                    Masih ditemukan <b>{res['jumlah_ooc']} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{', '.join(ooc['Subgrup'].astype(str).tolist())}</b>.
+                </div>
+                """, unsafe_allow_html=True)
                 ooc_tampil = ooc[["Subgrup", "Tanggal", "Jumlah Produk Cacat", "Jumlah Unit Diperiksa", "p_i", "BKA_Aktif", "BKB_Aktif"]].copy()
                 ooc_tampil["Tanggal"] = pd.to_datetime(ooc_tampil["Tanggal"]).dt.strftime("%Y-%m-%d")
                 st.dataframe(ooc_tampil, use_container_width=True, hide_index=True)
@@ -700,7 +822,7 @@ def halaman_peta_kendali():
                     key=f"alasan_tahap_{tahap_ke}"
                 )
 
-                if st.button(f"➡️ Lanjut Analisis Peta Kendali Tahap {tahap_ke + 1}", key=f"btn_lanjut_{tahap_ke}", disabled=(not pilihan_ooc)):
+                if st.button(f"Lanjut Analisis Peta Kendali Tahap {tahap_ke + 1}", key=f"btn_lanjut_{tahap_ke}", disabled=(not pilihan_ooc)):
                     st.session_state.riwayat_iterasi.append([int(x) for x in pilihan_ooc])
                     for sg in pilihan_ooc:
                         tgl = ooc.loc[ooc["Subgrup"] == sg, "Tanggal"].iloc[0]
@@ -712,10 +834,7 @@ def halaman_peta_kendali():
                     st.rerun()
 
 def halaman_runs_test():
-    render_header(
-        judul="Uji Keacakan (Runs Test)",
-        subjudul="Pengujian Pola Acak Proporsi Cacat Produksi"
-    )
+    render_header(judul="Uji Keacakan (Runs Test)")
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -727,30 +846,52 @@ def halaman_runs_test():
         st.error(str(e))
         return
 
-    alpha = st.number_input("Taraf signifikansi (α)", min_value=0.01, max_value=0.10, value=0.05, step=0.01)
+    alpha = 0.05
     a, b, c, d = st.columns(4)
     render_kpi(a, "M", "icon-dark", "accent-dark", "Median Proporsi", f"{rt['median']:.5f}")
-    render_kpi(b, "V", "icon-dark", "accent-yellow", "Jumlah Runs (V)", str(rt["V"]))
-    render_kpi(c, "Z", "icon-dark", "accent-yellow", "Statistik Uji Z", f"{rt['Z']:.4f}")
+    render_kpi(b, "V", "icon-dark", "accent-yellow", "Jumlah Runs", str(rt["V"]))
+    render_kpi(c, "Z", "icon-dark", "accent-yellow", "Statistik Uji", f"{rt['Z']:.4f}")
     render_kpi(d, "P", "icon-red", "accent-red", "P-value", f"{rt['p_value']:.4f}")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
-        st.error("Keputusan: Tolak H₀. Data tidak menyebar secara acak.")
+        st.markdown("""
+        <div class="interp-box interp-red">
+            <b>Keputusan (α = 0,05): Tolak H₀.</b> Data tidak menyebar secara acak.
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.success("Keputusan: Gagal menolak H₀. Tidak terdapat bukti bahwa data menyebar tidak acak.")
+        st.markdown("""
+        <div class="interp-box interp-blue">
+            <b>Keputusan (α = 0,05): Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak.
+        </div>
+        """, unsafe_allow_html=True)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU)))
-    fig.add_hline(y=rt["median"], line_dash="dash", line_color=KUNING, annotation_text=f"Median = {rt['median']:.5f}")
-    fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
-    st.plotly_chart(style_plotly(fig), use_container_width=True)
+    fig.add_trace(go.Scatter(
+        x=df_ctrl["Subgrup"],
+        y=df_ctrl["p_i"],
+        mode="lines+markers",
+        name="Proporsi cacat",
+        line=dict(color=BIRU, width=2, dash="solid"),
+        marker=dict(color=BIRU, size=7)
+    ))
+    fig.add_trace(go.Scatter(
+        x=df_ctrl["Subgrup"],
+        y=[rt["median"]] * len(df_ctrl),
+        mode="lines",
+        name=f"Median = {rt['median']:.5f}",
+        line=dict(color=MERAH, width=2, dash="solid")
+    ))
+    fig.update_layout(
+        title="Proporsi Cacat terhadap Median",
+        xaxis_title="Subgrup",
+        yaxis_title="Proporsi cacat"
+    )
+    st.plotly_chart(style_plotly_excel(fig), use_container_width=True)
 
 def halaman_kapabilitas():
-    render_header(
-        judul="Indeks Kapabilitas Proses",
-        subjudul="Pengukuran Kapabilitas Data Atribut (P%pk)"
-    )
+    render_header(judul="Indeks Kapabilitas Proses")
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -763,28 +904,44 @@ def halaman_kapabilitas():
         return
 
     a, b, c = st.columns(3)
-    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Proporsi Cacat (p̄)", f"{res['p_bar']:.5f}")
-    render_kpi(b, "Z", "icon-dark", "accent-yellow", "Nilai Normal Z(p̄)", f"{z_p:.5f}")
-    render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
+    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Proporsi Cacat", f"{res['p_bar']:.5f}")
+    render_kpi(b, "Z", "icon-dark", "accent-yellow", "Nilai Normal", f"{z_p:.5f}")
+    render_kpi(c, "C", "icon-red", "accent-red", "Indeks Kapabilitas Proses", f"{ppk:.5f}")
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.latex(r"P\%_{pk} = \frac{Z(\bar{p})}{3}")
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    ppk_teks = f"{ppk:.3f}".replace(".", ",")
+    zp_teks = f"{z_p:.3f}".replace(".", ",")
+
     if ppk >= 1:
-        st.success("Interpretasi berdasarkan batas P%pk ≥ 1: proses kapabel.")
+        st.markdown("""
+        <div class="interp-box interp-blue">
+            <b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="interp-box interp-blue">
+            Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses sudah kapabel, sehingga perlu dipertahankan melalui pengendalian kualitas secara konsisten.
+        </div>
+        """, unsafe_allow_html=True)
     else:
-        st.error("Interpretasi berdasarkan batas P%pk < 1: proses belum kapabel.")
+        st.markdown("""
+        <div class="interp-box interp-red">
+            <b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b>
+        </div>
+        """, unsafe_allow_html=True)
+        st.markdown(f"""
+        <div class="interp-box interp-blue">
+            Nilai P%pk sebesar <b>{ppk_teks}</b> dan Z sebesar <b>{zp_teks}</b> menunjukkan bahwa proses belum kapabel, sehingga diperlukan perbaikan untuk menurunkan proporsi cacat dan meningkatkan kapabilitas proses.
+        </div>
+        """, unsafe_allow_html=True)
 
 def halaman_level_sigma():
-    render_header(
-        judul="Level Sigma",
-        subjudul="Perhitungan DPO, DPMO, dan Nilai Sigma Proses Produksi"
-    )
+    render_header(judul="Level Sigma")
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    # Menggunakan seluruh data produksi awal (Fase I) sesuai perhitungan di Excel
     total_cacat = int(dasar["Jumlah Produk Cacat"].sum())
     total_unit = int(dasar["Jumlah Unit Diperiksa"].sum())
 
@@ -795,15 +952,65 @@ def halaman_level_sigma():
         return
 
     a, b, c, d = st.columns(4)
-    render_kpi(a, "❗", "icon-red", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(b, "D", "icon-dark", "accent-dark", "DPO", f"{dpo:.5f}")
-    render_kpi(c, "M", "icon-dark", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
-    render_kpi(d, "Σ", "icon-red", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
+    render_kpi(a, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(b, None, "", "accent-dark", "DPO", f"{dpo:.5f}")
+    render_kpi(c, None, "", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
+    render_kpi(d, None, "", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
-    st.latex(r"DPMO = DPO \times 10^6")
-    st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
+    st.markdown("### Interpretasi & Referensi Capaian")
+
+    dpmo_teks = f"{dpmo:,.2f}".replace(",", "X").replace(".", ",").replace("X", ".")
+    peluang_bulat = format_angka(round(dpmo))
+    sigma_teks = f"{sigma:.2f}".replace(".", ",") if np.isfinite(sigma) else "∞"
+
+    col_interp, col_tabel = st.columns([1.15, 1])
+    with col_interp:
+        st.markdown(f"""
+        <div class="interp-box interp-blue" style="height: 100%; display: flex; align-items: center;">
+            <div>
+                Hasil perhitungan menunjukkan nilai DPMO sebesar <b>{dpmo_teks}</b> dengan level sigma <b>{sigma_teks}</b>. Artinya, dari satu juta peluang terdapat sekitar <b>{peluang_bulat}</b> peluang terjadinya cacat. Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ), sehingga perlu dilakukan perbaikan untuk menurunkan jumlah cacat dan meningkatkan level sigma.
+            </div>
+        </div>
+        """, unsafe_allow_html=True)
+
+    with col_tabel:
+        st.markdown("""
+        <table class="sigma-ref-table">
+            <thead>
+                <tr>
+                    <th>Level Sigma</th>
+                    <th>DPMO</th>
+                    <th>Keterangan</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td>2 sigma</td>
+                    <td>508,538</td>
+                    <td rowspan="2">Rata-rata industri Indonesia</td>
+                </tr>
+                <tr>
+                    <td>3 sigma</td>
+                    <td>66,807</td>
+                </tr>
+                <tr>
+                    <td>4 sigma</td>
+                    <td>6,210</td>
+                    <td rowspan="2">Rata-rata industri USA</td>
+                </tr>
+                <tr>
+                    <td>5 sigma</td>
+                    <td>233</td>
+                </tr>
+                <tr>
+                    <td>6 sigma</td>
+                    <td>3,4</td>
+                    <td>Industri kelas dunia</td>
+                </tr>
+            </tbody>
+        </table>
+        """, unsafe_allow_html=True)
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -855,7 +1062,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
             )
 
     fig.update_layout(
-        title="<b>Diagram Sebab-Akibat (Fishbone) — PT XYZ</b>",
+        title=dict(text="<b>Diagram Sebab-Akibat (Fishbone) — PT XYZ</b>", font=dict(color=HITAM)),
         xaxis=dict(range=[0, 10.9], visible=False),
         yaxis=dict(range=[0, 10.0], visible=False),
         paper_bgcolor=PUTIH, plot_bgcolor=PUTIH,
@@ -864,10 +1071,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
     return fig
 
 def halaman_fishbone():
-    render_header(
-        judul="Diagram Sebab-Akibat (Fishbone)",
-        subjudul="Identifikasi Akar Penyebab Kecacatan Berdasarkan Kategori 6M"
-    )
+    render_header(judul="Diagram Sebab-Akibat (Fishbone)")
 
     st.markdown("""
     <div class="action-card">
@@ -895,17 +1099,21 @@ def halaman_fishbone():
         target_col = col1 if i % 2 == 0 else col2
         with target_col:
             input_baru[kat] = st.text_area(
-                f"📌 {kat}",
+                kat,
                 value=st.session_state.fishbone_inputs.get(kat, ""),
                 height=105,
                 placeholder=f"Ketik penyebab dari faktor {kat.split(' ')[0]}...",
                 key=f"fb_input_{kat}"
             )
 
-    if st.button("📊 Buat Gambar Diagram Fishbone & Simpan", use_container_width=True):
+    if st.button("Buat Gambar Diagram Fishbone & Simpan", use_container_width=True):
         st.session_state.fishbone_inputs = input_baru
         st.session_state.fishbone_generated = True
-        st.success("Data penyebab berhasil disimpan! Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.")
+        st.markdown("""
+        <div class="interp-box interp-blue">
+            Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.
+        </div>
+        """, unsafe_allow_html=True)
 
     data_parsed = {}
     total_penyebab = 0
@@ -919,45 +1127,26 @@ def halaman_fishbone():
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
         st.plotly_chart(fig_fb, use_container_width=True)
 
-# Kamus Skala Ketetapan Perusahaan untuk FMEA
-SKALA_SEVERITY = {
-    "Low (1)": 1,
-    "Medium (2)": 2,
-    "High (3)": 3,
-    "Extreme (4)": 4,
-    "Disaster (5)": 5
-}
-
-SKALA_OCCURRENCE = {
-    "Low (1)": 1,
-    "Medium (2)": 2,
-    "High (3)": 3,
-    "Extreme (4)": 4
-}
-
-def status_tindakan_rpn(rpn, rpn_maks):
-    if rpn == rpn_maks and rpn > 0:
-        return "🚨 Prioritas Utama (RPN Tertinggi — Segera Diperbaiki)"
-    elif rpn >= 9:
-        return "🔴 Prioritas Tinggi (Segera Diperbaiki)"
-    elif rpn >= 4:
-        return "🟡 Prioritas Sedang (Perlu Pengendalian)"
+def kategori_prioritas_rpn(rpn):
+    if pd.isna(rpn):
+        return "-"
+    if rpn >= 50:
+        return "Prioritas Tinggi (Segera Diperbaiki)"
+    elif rpn >= 25:
+        return "Prioritas Sedang (Perlu Pengendalian)"
     else:
-        return "🟢 Prioritas Rendah (Pemantauan Rutin)"
+        return "Prioritas Rendah (Pemantauan Rutin)"
 
 def halaman_fmea():
-    render_header(
-        judul="Failure Mode and Effects Analysis (FMEA)",
-        subjudul="Penilaian Risiko & Penentuan Prioritas Perbaikan Berdasarkan Standar Perusahaan"
-    )
+    render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
     st.markdown("""
     <div class="action-card">
         <div class="action-header">
-            <div class="action-badge">ℹ</div>
-            <h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN (Ketetapan Perusahaan)</h3>
+            <div class="action-badge">i</div>
+            <h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3>
         </div>
-        <p class="action-desc">
+        <div class="fmea-guide-text">
             • <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>
             • <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>
             &nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>
@@ -970,9 +1159,9 @@ def halaman_fmea():
             &nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>
             &nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>
             &nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>
-            • <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity &times; Occurrence, rentang 1–20):</b><br>
+            • <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>
             &nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.
-        </p>
+        </div>
     </div>
     """, unsafe_allow_html=True)
 
@@ -1001,22 +1190,18 @@ def halaman_fmea():
     else:
         df_merged = df_base.copy()
         df_merged["Dampak Kegagalan"] = ""
-        df_merged["Severity"] = "Low (1)"
-        df_merged["Occurrence"] = "Low (1)"
+        df_merged["Severity"] = 1
+        df_merged["Occurrence"] = 1
         df_merged["Usulan Perbaikan"] = ""
 
     df_merged["Dampak Kegagalan"] = df_merged["Dampak Kegagalan"].fillna("")
-    df_merged["Severity"] = df_merged["Severity"].where(df_merged["Severity"].isin(SKALA_SEVERITY.keys()), "Low (1)")
-    df_merged["Occurrence"] = df_merged["Occurrence"].where(df_merged["Occurrence"].isin(SKALA_OCCURRENCE.keys()), "Low (1)")
+    df_merged["Severity"] = df_merged["Severity"].fillna(1).astype(int)
+    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).astype(int)
     df_merged["Usulan Perbaikan"] = df_merged["Usulan Perbaikan"].fillna("")
+    df_merged["RPN (S × O)"] = df_merged["Severity"] * df_merged["Occurrence"]
+    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
 
-    skor_s = df_merged["Severity"].map(SKALA_SEVERITY).astype(int)
-    skor_o = df_merged["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
-    df_merged["RPN (S × O)"] = skor_s * skor_o
-    rpn_max_awal = int(df_merged["RPN (S × O)"].max()) if not df_merged.empty else 0
-    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_max_awal))
-
-    st.markdown("### Input Penilaian Severity & Occurrence")
+    st.markdown("### Input Skor Severity & Occurrence")
     edited_fmea = st.data_editor(
         df_merged,
         use_container_width=True,
@@ -1025,16 +1210,8 @@ def halaman_fmea():
             "Kategori (6M)": st.column_config.TextColumn("Kategori (6M)", disabled=True),
             "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn("Failure Mode / Penyebab Kegagalan", disabled=True),
             "Dampak Kegagalan": st.column_config.TextColumn("Dampak Kegagalan (Opsional)"),
-            "Severity": st.column_config.SelectboxColumn(
-                "Severity (S)",
-                options=list(SKALA_SEVERITY.keys()),
-                required=True
-            ),
-            "Occurrence": st.column_config.SelectboxColumn(
-                "Occurrence (O)",
-                options=list(SKALA_OCCURRENCE.keys()),
-                required=True
-            ),
+            "Severity": st.column_config.NumberColumn("Severity (1–5)", min_value=1, max_value=5, step=1, required=True),
+            "Occurrence": st.column_config.NumberColumn("Occurrence (1–4)", min_value=1, max_value=4, step=1, required=True),
             "RPN (S × O)": st.column_config.NumberColumn("RPN (S × O)", disabled=True),
             "Keterangan Prioritas": st.column_config.TextColumn("Keterangan Prioritas", disabled=True),
             "Usulan Perbaikan": st.column_config.TextColumn("Usulan Perbaikan")
@@ -1042,48 +1219,42 @@ def halaman_fmea():
         key="editor_fmea_otomatis"
     )
 
-    if st.button("⚡ Hitung Nilai RPN & Urutkan Prioritas Tertinggi", use_container_width=True):
+    if st.button("Hitung Nilai RPN & Urutkan Prioritas", use_container_width=True):
         hasil = edited_fmea.copy()
-        s_val = hasil["Severity"].map(SKALA_SEVERITY).astype(int)
-        o_val = hasil["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
-        hasil["RPN (S × O)"] = s_val * o_val
-        rpn_maks = int(hasil["RPN (S × O)"].max()) if not hasil.empty else 0
-        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_maks))
+        hasil["RPN (S × O)"] = hasil["Severity"].astype(int) * hasil["Occurrence"].astype(int)
+        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(kategori_prioritas_rpn)
         st.session_state.fmea_scores = hasil
         st.rerun()
 
     hasil_akhir = edited_fmea.copy()
-    s_final = hasil_akhir["Severity"].map(SKALA_SEVERITY).astype(int)
-    o_final = hasil_akhir["Occurrence"].map(SKALA_OCCURRENCE).astype(int)
-    hasil_akhir["RPN (S × O)"] = s_final * o_final
-    rpn_tertinggi = int(hasil_akhir["RPN (S × O)"].max()) if not hasil_akhir.empty else 0
-    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(lambda x: status_tindakan_rpn(x, rpn_tertinggi))
+    hasil_akhir["RPN (S × O)"] = hasil_akhir["Severity"].astype(int) * hasil_akhir["Occurrence"].astype(int)
+    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
     hasil_akhir = hasil_akhir.sort_values("RPN (S × O)", ascending=False).reset_index(drop=True)
     hasil_akhir.insert(0, "Peringkat", np.arange(1, len(hasil_akhir) + 1))
 
     st.markdown("---")
-    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari Nilai RPN Tertinggi)")
+    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)")
     st.dataframe(hasil_akhir, use_container_width=True, hide_index=True)
 
     out_fmea = io.BytesIO()
     with pd.ExcelWriter(out_fmea, engine="openpyxl") as writer:
         hasil_akhir.to_excel(writer, index=False, sheet_name="Hasil_FMEA")
     st.download_button(
-        "⬇️ Download Tabel Hasil FMEA (.xlsx)",
+        "Download Tabel Hasil FMEA (.xlsx)",
         data=out_fmea.getvalue(),
         file_name="Hasil_Analisis_FMEA_PT_XYZ.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
 MENU_ITEMS = {
-    "🏠  Beranda (Input Data)": halaman_beranda,
-    "📊  Identifikasi Overdispersi": halaman_overdispersi,
-    "📈  Peta Kendali": halaman_peta_kendali,
-    "🔀  Uji Keacakan (Runs Test)": halaman_runs_test,
-    "⏱️  Indeks Kapabilitas Proses": halaman_kapabilitas,
-    "Σ   Level Sigma": halaman_level_sigma,
-    "🐟  Diagram Sebab-Akibat": halaman_fishbone,
-    "📋  FMEA": halaman_fmea
+    "Beranda (Input Data)": halaman_beranda,
+    "Identifikasi Overdispersi": halaman_overdispersi,
+    "Peta Kendali": halaman_peta_kendali,
+    "Uji Keacakan (Runs Test)": halaman_runs_test,
+    "Indeks Kapabilitas Proses": halaman_kapabilitas,
+    "Level Sigma": halaman_level_sigma,
+    "Diagram Sebab-Akibat": halaman_fishbone,
+    "FMEA": halaman_fmea
 }
 
 with st.sidebar:
