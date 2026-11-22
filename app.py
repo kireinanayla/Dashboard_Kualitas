@@ -25,8 +25,14 @@ st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
-html, body, [class*="css"], .stApp, button, input, textarea, select, table, th, td, p, div, span, h1, h2, h3, h4, label {{
+/* Terapkan Poppins ke seluruh teks tanpa merusak Material Icon bawaan Streamlit */
+html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, button, table, th, td {{
     font-family: 'Poppins', sans-serif !important;
+}}
+[data-testid="stIconMaterial"],
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="collapsedControl"] span {{
+    font-family: 'Material Symbols Rounded', 'Material Icons', sans-serif !important;
 }}
 
 .stApp {{
@@ -34,14 +40,14 @@ html, body, [class*="css"], .stApp, button, input, textarea, select, table, th, 
     color: {HITAM};
 }}
 .block-container {{
-    padding-top: 1.1rem;
+    padding-top: 1rem;
     padding-bottom: 2rem;
     max-width: 1380px;
 }}
 
 /* Sidebar Terkunci & Header Putih PT XYZ */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 68px, {HITAM} 68px, {HITAM} 100%) !important;
+    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 64px, {HITAM} 64px, {HITAM} 100%) !important;
     border-right: 1px solid #E5E7EB;
     height: 100vh !important;
     max-height: 100vh !important;
@@ -53,37 +59,38 @@ html, body, [class*="css"], .stApp, button, input, textarea, select, table, th, 
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
-    padding-top: 0.65rem !important;
-    padding-bottom: 0.65rem !important;
+    padding-top: 0.6rem !important;
+    padding-bottom: 0.6rem !important;
 }}
 
-/* Tombol Segitiga / Panah Buka-Tutup Sidebar (< dan >) agar Kontras & Tidak Ketutupan */
+/* Tombol Buka-Tutup Sidebar agar Bersih & Kontras (Tanpa Teks Rusak) */
 [data-testid="stSidebarCollapseButton"] button,
-[data-testid="collapsedControl"] button,
-button[kind="headerNoPadding"] {{
+[data-testid="collapsedControl"] button {{
     background-color: {HITAM} !important;
     color: {PUTIH} !important;
-    border: 1.5px solid {HITAM} !important;
+    border: none !important;
     border-radius: 8px !important;
-    opacity: 1 !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.18) !important;
+    width: 32px !important;
+    height: 32px !important;
+    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
 }}
 [data-testid="stSidebarCollapseButton"] button:hover,
 [data-testid="collapsedControl"] button:hover {{
     background-color: {MERAH} !important;
-    border-color: {MERAH} !important;
     color: {PUTIH} !important;
 }}
 [data-testid="stSidebarCollapseButton"] svg,
-[data-testid="collapsedControl"] svg {{
+[data-testid="collapsedControl"] svg,
+[data-testid="stSidebarCollapseButton"] span,
+[data-testid="collapsedControl"] span {{
     fill: {PUTIH} !important;
     color: {PUTIH} !important;
 }}
 
-/* Header PT XYZ Pojok Kiri Atas */
+/* Tulisan PT XYZ Saja di Pojok Kiri Atas */
 .sidebar-logo {{
     text-align: left;
-    padding: 6px 14px 14px 14px;
+    padding: 4px 14px 14px 14px;
     margin-bottom: 8px;
 }}
 .logo-title {{
@@ -94,7 +101,7 @@ button[kind="headerNoPadding"] {{
     line-height: 1.2;
 }}
 
-/* Menu Radio di Sidebar */
+/* Menu Radio di Sidebar (Tanpa Emotikon) */
 [data-testid="stSidebar"] .stRadio > label {{
     display: none !important;
 }}
@@ -133,42 +140,25 @@ button[kind="headerNoPadding"] {{
     display: none !important;
 }}
 
-/* Header Banner Utama Ramping */
+/* Header Banner Tiap Halaman: Ringkas, Font Lebih Kecil, & Shadow Halus */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: {PUTIH};
-    padding: 13px 22px;
+    padding: 12px 22px;
     border-radius: 14px;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    box-shadow: 0 4px 16px rgba(26, 28, 32, 0.08);
     border: 1px solid #E5E7EB;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
     gap: 14px;
 }}
-.header-left {{
-    display: flex;
-    align-items: stretch;
-    gap: 12px;
-}}
-.header-stripe {{
-    width: 5px;
-    border-radius: 4px;
-    background: linear-gradient(180deg, {MERAH} 0%, {MERAH} 65%, {KUNING} 65%, {KUNING} 100%);
-}}
 .header-title {{
-    font-size: 21px;
+    font-size: 18.5px;
     font-weight: 700;
     color: {HITAM};
     margin: 0;
-    line-height: 1.2;
-}}
-.header-subtitle {{
-    font-size: 12.5px;
-    font-style: italic;
-    color: {ABU_TEKS};
-    margin: 2px 0 0 0;
-    line-height: 1.3;
+    line-height: 1.25;
 }}
 .period-badge {{
     display: inline-flex;
@@ -178,27 +168,48 @@ button[kind="headerNoPadding"] {{
     border: 1px solid #D1D5DB;
     border-radius: 9px;
     padding: 6px 13px;
-    font-size: 12.5px;
+    font-size: 12px;
     font-weight: 600;
     color: {HITAM};
     white-space: nowrap;
     flex-shrink: 0;
 }}
 
-/* Kartu KPI Fleksibel & Responsif */
+/* Menyamakan Tinggi & Lebar Kolom KPI */
+div[data-testid="stHorizontalBlock"] {{
+    align-items: stretch !important;
+}}
+div[data-testid="column"],
+div[data-testid="stColumn"] {{
+    display: flex !important;
+    flex-direction: column !important;
+}}
+div[data-testid="column"] > div,
+div[data-testid="stColumn"] > div,
+div[data-testid="column"] [data-testid="stVerticalBlock"],
+div[data-testid="stColumn"] [data-testid="stVerticalBlock"],
+div[data-testid="column"] [data-testid="stMarkdownContainer"],
+div[data-testid="stColumn"] [data-testid="stMarkdownContainer"] {{
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}}
+
+/* Kartu KPI Seragam Panjang & Lebarnya */
 .kpi-box {{
     background: {PUTIH};
     border-radius: 14px;
-    padding: 16px 18px;
+    padding: 16px 20px;
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+    box-shadow: 0 3px 12px rgba(26, 28, 32, 0.05);
     border: 1px solid #E5E7EB;
     position: relative;
     overflow: hidden;
-    min-height: 104px;
-    height: 100%;
+    height: 112px;
+    min-height: 112px;
+    max-height: 112px;
     width: 100%;
     box-sizing: border-box;
 }}
@@ -237,7 +248,7 @@ button[kind="headerNoPadding"] {{
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 18px;
+    font-size: 17px;
     font-weight: 700;
     color: {PUTIH};
     flex-shrink: 0;
@@ -253,13 +264,13 @@ button[kind="headerNoPadding"] {{
     font-size: 12.5px;
     font-weight: 600;
     color: {ABU_TEKS};
-    margin-bottom: 3px;
+    margin-bottom: 4px;
     line-height: 1.3;
     white-space: normal;
     word-wrap: break-word;
 }}
 .kpi-number {{
-    font-size: clamp(18px, 1.4vw, 23px);
+    font-size: clamp(18px, 1.35vw, 22px);
     font-weight: 800;
     color: {HITAM};
     line-height: 1.2;
@@ -272,7 +283,7 @@ button[kind="headerNoPadding"] {{
     background: {PUTIH};
     border-radius: 14px;
     padding: 18px 22px 14px 22px;
-    box-shadow: 0 3px 10px rgba(0,0,0,0.03);
+    box-shadow: 0 3px 12px rgba(26, 28, 32, 0.05);
     border: 1px solid #E5E7EB;
     margin-bottom: 12px;
 }}
@@ -296,7 +307,7 @@ button[kind="headerNoPadding"] {{
     flex-shrink: 0;
 }}
 .action-title {{
-    font-size: 16.5px;
+    font-size: 16px;
     font-weight: 700;
     color: {HITAM};
     margin: 0;
@@ -380,9 +391,9 @@ if "fishbone_generated" not in st.session_state:
 if "fmea_scores" not in st.session_state:
     st.session_state.fmea_scores = pd.DataFrame()
 
-CALENDAR_SVG = '<svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
+CALENDAR_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
 
-def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"):
+def render_header(judul="Six Sigma Dashboard"):
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
         tgl_awal = df["Tanggal"].min().strftime("%b %Y")
@@ -393,19 +404,17 @@ def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produ
 
     html = (
         f'<div class="dashboard-header">'
-        f'<div class="header-left">'
-        f'<div class="header-stripe"></div>'
-        f'<div><h1 class="header-title">{judul}</h1><p class="header-subtitle">{subjudul}</p></div>'
-        f'</div>'
+        f'<h1 class="header-title">{judul}</h1>'
         f'<div class="period-badge">{CALENDAR_SVG} <span>Periode Analisis: {periode_teks}</span></div>'
         f'</div>'
     )
     st.markdown(html, unsafe_allow_html=True)
 
-def render_kpi(kolom, ikon, warna_ikon, aksen_bawah, label, nilai):
+def render_kpi(kolom, simbol, warna_ikon, aksen_bawah, label, nilai):
+    simbol_html = f'<div class="kpi-icon {warna_ikon}">{simbol}</div>' if simbol else ""
     html = (
         f'<div class="kpi-box {aksen_bawah}">'
-        f'<div class="kpi-icon {warna_ikon}">{ikon}</div>'
+        f'{simbol_html}'
         f'<div class="kpi-content"><div class="kpi-title">{label}</div><div class="kpi-number">{nilai}</div></div>'
         f'</div>'
     )
@@ -568,10 +577,7 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
     return dpo, dpmo, sigma
 
 def halaman_beranda():
-    render_header(
-        judul="Six Sigma Dashboard",
-        subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"
-    )
+    render_header(judul="Six Sigma Dashboard")
 
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
@@ -584,9 +590,9 @@ def halaman_beranda():
         persen = 0.0
 
     k1, k2, k3 = st.columns(3)
-    render_kpi(k1, "📦", "icon-dark", "accent-red", "Total Unit Diperiksa", format_angka(total_unit))
-    render_kpi(k2, "❗", "icon-red", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(k3, "%", "icon-dark", "accent-yellow", "Persentase Cacat", f"{persen:.2f}%")
+    render_kpi(k1, None, "", "accent-red", "Total Unit Diperiksa", format_angka(total_unit))
+    render_kpi(k2, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(k3, None, "", "accent-yellow", "Persentase Cacat", f"{persen:.2f}%")
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
 
@@ -629,10 +635,7 @@ def halaman_beranda():
         st.dataframe(tampil, use_container_width=True, hide_index=True)
 
 def halaman_overdispersi():
-    render_header(
-        judul="Identifikasi Overdispersi",
-        subjudul="Evaluasi Kondisi Overdispersi & Pemilihan Jenis Peta Kendali"
-    )
+    render_header(judul="Identifikasi Overdispersi")
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -647,7 +650,7 @@ def halaman_overdispersi():
     render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
     render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
     render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
-    render_kpi(d, "✓", "icon-red", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
+    render_kpi(d, None, "", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if res["is_overdispersed"]:
@@ -656,10 +659,7 @@ def halaman_overdispersi():
         st.markdown(f'<div class="interp-box interp-blue">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
 
 def halaman_peta_kendali():
-    render_header(
-        judul="Analisis Peta Kendali",
-        subjudul="Pemantauan & Revisi Bertahap Hingga Seluruh Subgrup In Control"
-    )
+    render_header(judul="Analisis Peta Kendali")
     if st.session_state.df_produksi is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
@@ -700,9 +700,9 @@ def halaman_peta_kendali():
             break
 
         a, b, c = st.columns(3)
-        render_kpi(a, "📈", "icon-dark", "accent-dark", f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
-        render_kpi(b, "—", "icon-dark", "accent-yellow", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
-        render_kpi(c, "⚠", "icon-red", "accent-red", "Subgrup Out of Control", str(res["jumlah_ooc"]))
+        render_kpi(a, None, "", "accent-dark", f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
+        render_kpi(b, None, "", "accent-yellow", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
+        render_kpi(c, None, "", "accent-red", "Subgrup Out of Control", str(res["jumlah_ooc"]))
 
         st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
 
@@ -721,7 +721,7 @@ def halaman_peta_kendali():
 
         if is_tahap_terakhir:
             if ooc.empty:
-                st.markdown(f'<div class="interp-box interp-blue"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}!</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="interp-box interp-blue"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="interp-box interp-red">Masih ditemukan <b>{res["jumlah_ooc"]} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{", ".join(ooc["Subgrup"].astype(str).tolist())}</b>.</div>', unsafe_allow_html=True)
                 ooc_tampil = ooc[["Subgrup", "Tanggal", "Jumlah Produk Cacat", "Jumlah Unit Diperiksa", "p_i", "BKA_Aktif", "BKB_Aktif"]].copy()
@@ -752,10 +752,7 @@ def halaman_peta_kendali():
                     st.rerun()
 
 def halaman_runs_test():
-    render_header(
-        judul="Uji Keacakan (Runs Test)",
-        subjudul="Pengujian Pola Acak Proporsi Cacat Produksi"
-    )
+    render_header(judul="Uji Keacakan (Runs Test)")
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -787,10 +784,7 @@ def halaman_runs_test():
     st.plotly_chart(style_plotly(fig), use_container_width=True)
 
 def halaman_kapabilitas():
-    render_header(
-        judul="Indeks Kapabilitas Proses",
-        subjudul="Pengukuran Kapabilitas Data Atribut (P%pk)"
-    )
+    render_header(judul="Indeks Kapabilitas Proses")
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -815,10 +809,7 @@ def halaman_kapabilitas():
         st.markdown('<div class="interp-box interp-red"><b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b></div>', unsafe_allow_html=True)
 
 def halaman_level_sigma():
-    render_header(
-        judul="Level Sigma",
-        subjudul="Perhitungan DPO, DPMO, dan Nilai Sigma Proses Produksi"
-    )
+    render_header(judul="Level Sigma")
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -834,10 +825,10 @@ def halaman_level_sigma():
         return
 
     a, b, c, d = st.columns(4)
-    render_kpi(a, "❗", "icon-red", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(b, "D", "icon-dark", "accent-dark", "DPO", f"{dpo:.5f}")
-    render_kpi(c, "M", "icon-dark", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
-    render_kpi(d, "Σ", "icon-red", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
+    render_kpi(a, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(b, None, "", "accent-dark", "DPO", f"{dpo:.5f}")
+    render_kpi(c, None, "", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
+    render_kpi(d, None, "", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
@@ -903,10 +894,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
     return fig
 
 def halaman_fishbone():
-    render_header(
-        judul="Diagram Sebab-Akibat (Fishbone)",
-        subjudul="Identifikasi Akar Penyebab Kecacatan Berdasarkan Kategori 5M dan 1E"
-    )
+    render_header(judul="Diagram Sebab-Akibat (Fishbone)")
 
     st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">✎</div><h3 class="action-title">Input Penyebab Kecacatan (5M dan 1E)</h3></div><p class="action-desc">Tuliskan akar penyebab pada masing-masing kategori di bawah ini (pisahkan dengan baris baru / Enter jika lebih dari satu penyebab). Hasil inputan akan otomatis membentuk gambar Diagram Fishbone dan diteruskan ke tabel FMEA.</p></div>', unsafe_allow_html=True)
 
@@ -926,7 +914,7 @@ def halaman_fishbone():
         target_col = col1 if i % 2 == 0 else col2
         with target_col:
             input_baru[kat] = st.text_area(
-                f"📌 {kat}",
+                kat,
                 value=st.session_state.fishbone_inputs.get(kat, ""),
                 height=105,
                 placeholder=f"Ketik penyebab dari faktor {kat.split(' ')[0]}...",
@@ -961,14 +949,11 @@ def kategori_prioritas_rpn(rpn):
         return "Prioritas Rendah (Pemantauan Rutin)"
 
 def halaman_fmea():
-    render_header(
-        judul="Failure Mode and Effects Analysis (FMEA)",
-        subjudul="Penilaian Risiko & Penentuan Prioritas Perbaikan Berdasarkan Nilai RPN"
-    )
+    render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
     st.markdown(
         '<div class="action-card">'
-        '<div class="action-header"><div class="action-badge">ℹ</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
+        '<div class="action-header"><div class="action-badge">i</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
         '<p class="action-desc">'
         '• <b>Failure Mode / Potensi Kegagalan</b> di bawah ini ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
         '• <b>Severity (S) [Skala 1–10]:</b> Tingkat keparahan dampak kecacatan terhadap kualitas produk maupun proses produksi berikutnya (<i>1 = dampak sangat ringan/tidak terasa, 10 = dampak sangat fatal/produk ditolak total</i>).<br>'
@@ -1060,14 +1045,14 @@ def halaman_fmea():
     )
 
 MENU_ITEMS = {
-    "🏠  Beranda (Input Data)": halaman_beranda,
-    "📊  Identifikasi Overdispersi": halaman_overdispersi,
-    "📈  Peta Kendali": halaman_peta_kendali,
-    "🔀  Uji Keacakan (Runs Test)": halaman_runs_test,
-    "⏱️  Indeks Kapabilitas Proses": halaman_kapabilitas,
-    "Σ   Level Sigma": halaman_level_sigma,
-    "🐟  Diagram Sebab-Akibat": halaman_fishbone,
-    "📋  FMEA": halaman_fmea
+    "Beranda (Input Data)": halaman_beranda,
+    "Identifikasi Overdispersi": halaman_overdispersi,
+    "Peta Kendali": halaman_peta_kendali,
+    "Uji Keacakan (Runs Test)": halaman_runs_test,
+    "Indeks Kapabilitas Proses": halaman_kapabilitas,
+    "Level Sigma": halaman_level_sigma,
+    "Diagram Sebab-Akibat": halaman_fishbone,
+    "FMEA": halaman_fmea
 }
 
 with st.sidebar:
