@@ -1,5 +1,7 @@
+%%writefile app.py
 import io
 import math
+import textwrap
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -13,7 +15,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)[cite: 8]
+# Palet Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)
 MERAH = "#5C0A0A"
 MERAH_HOVER = "#420606"
 KUNING = "#F5C518"
@@ -24,7 +26,7 @@ ABU_TEKS = "#5A606A"
 
 st.markdown(f"""
 <style>
-@import url('[https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap](https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap)');
+@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 :root {{
     --primary-color: {MERAH} !important;
@@ -72,40 +74,37 @@ span[data-baseweb="tag"] {{
     background: {MERAH} !important;
     background-color: {MERAH} !important;
     border-right: none !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
+    min-height: 100vh !important;
 }}
 [data-testid="stSidebar"] > div:first-child,
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {{
     background-color: {MERAH} !important;
-    height: 100vh !important;
-    max-height: 100vh !important;
-    overflow: hidden !important;
+    min-height: 100vh !important;
+    overflow-y: auto !important;
     padding-top: 0 !important;
-    padding-bottom: 0.6rem !important;
+    padding-bottom: 0.8rem !important;
 }}
 
 [data-testid="stSidebarHeader"] {{
     background-color: {MERAH} !important;
-    min-height: 112px !important;
-    padding: 22px 14px 30px 18px !important;
+    min-height: 104px !important;
+    padding: 20px 14px 24px 18px !important;
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
     gap: 10px !important;
-    margin-bottom: 24px !important;
+    margin-bottom: 18px !important;
     border-bottom: 1.5px solid rgba(255, 255, 255, 0.32) !important;
 }}
 [data-testid="stSidebarHeader"]::before {{
     content: "Dashboard Kualitas Produksi PT XYZ";
     font-family: 'Poppins', sans-serif !important;
-    font-size: 16.5px;
+    font-size: 16px;
     font-weight: 700;
     color: {PUTIH};
     line-height: 1.4;
-    max-width: 190px;
+    max-width: 195px;
 }}
 
 [data-testid="stSidebarCollapseButton"] button {{
@@ -232,23 +231,6 @@ span[data-baseweb="tag"] {{
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }}
 
-div[data-testid="stHorizontalBlock"] {{
-    align-items: stretch !important;
-}}
-div[data-testid="column"],
-div[data-testid="stColumn"] {{
-    display: flex !important;
-    flex-direction: column !important;
-}}
-div[data-testid="column"] > div,
-div[data-testid="stColumn"] > div,
-div[data-testid="column"] [data-testid="stVerticalBlock"],
-div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
-    flex: 1 1 auto !important;
-    display: flex !important;
-    flex-direction: column !important;
-}}
-
 .kpi-box {{
     background: {PUTIH};
     border-radius: 14px;
@@ -261,8 +243,6 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     position: relative;
     overflow: hidden;
     height: 112px;
-    min-height: 112px;
-    max-height: 112px;
     width: 100%;
     box-sizing: border-box;
 }}
@@ -281,7 +261,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 17px;
+    font-size: 16px;
     font-weight: 700;
     color: {PUTIH};
     flex-shrink: 0;
@@ -296,15 +276,12 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     color: {ABU_TEKS};
     margin-bottom: 4px;
     line-height: 1.3;
-    white-space: normal;
-    word-wrap: break-word;
 }}
 .kpi-number {{
     font-size: clamp(18px, 1.35vw, 22px);
     font-weight: 800;
     color: {HITAM};
     line-height: 1.2;
-    white-space: normal;
     overflow-wrap: anywhere;
 }}
 
@@ -319,15 +296,13 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     box-sizing: border-box;
 }}
 .home-card {{
-    height: 192px !important;
-    min-height: 192px !important;
-    max-height: 192px !important;
-    padding: 24px 26px !important;
-    display: flex !important;
-    flex-direction: column !important;
-    justify-content: center !important;
-    align-items: flex-start !important;
-    margin-bottom: 14px !important;
+    height: 192px;
+    padding: 24px 26px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
+    align-items: flex-start;
+    margin-bottom: 14px;
 }}
 .action-header {{
     display: flex;
@@ -375,14 +350,11 @@ div.stDownloadButton > button {{
     border: none !important;
     border-radius: 10px !important;
     height: 46px !important;
-    min-height: 46px !important;
-    max-height: 46px !important;
     padding: 0 1.2rem !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
     box-shadow: 0 6px 16px rgba(26, 28, 32, 0.18) !important;
     width: 100% !important;
-    margin: 0 !important;
 }}
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {{
@@ -392,7 +364,6 @@ div.stDownloadButton > button:hover {{
 
 [data-testid="stFileUploader"] {{
     width: 100% !important;
-    margin: 0 !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
     background-color: {MERAH} !important;
@@ -400,7 +371,6 @@ div.stDownloadButton > button:hover {{
     border-radius: 10px !important;
     height: 46px !important;
     min-height: 46px !important;
-    max-height: 46px !important;
     padding: 0 16px !important;
     display: flex !important;
     align-items: center !important;
@@ -427,10 +397,6 @@ div.stDownloadButton > button:hover {{
     box-shadow: none !important;
     width: 100% !important;
     height: 100% !important;
-    display: flex !important;
-    align-items: center !important;
-    justify-content: center !important;
-    gap: 8px !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button *,
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
@@ -492,6 +458,8 @@ if "fishbone_inputs" not in st.session_state:
         "Measurement (Pengukuran)": "",
         "Environment (Lingkungan)": ""
     }
+if "fishbone_problem" not in st.session_state:
+    st.session_state.fishbone_problem = "Tingginya Produk Cacat Bata Ringan AAC"
 if "fishbone_generated" not in st.session_state:
     st.session_state.fishbone_generated = False
 if "fmea_scores" not in st.session_state:
@@ -673,6 +641,8 @@ def hitung_runs_test(series):
     mu = (2 * n1 * n2) / n + 1
     var = (2 * n1 * n2 * (2 * n1 * n2 - n1 - n2)) / (n**2 * (n - 1))
     sd = float(np.sqrt(var))
+    if sd <= 0:
+        raise ValueError("Simpangan baku Runs Test bernilai nol.")
     z = (V - mu) / sd
     p_value = float(2 * (1 - norm.cdf(abs(z))))
     return {
@@ -766,12 +736,17 @@ def halaman_beranda():
 
 def halaman_overdispersi():
     render_header(judul="Identifikasi Overdispersi")
-    dasar, _ = get_data_aktif()
+    dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
+
+    data_uji = aktif if (aktif is not None and len(aktif) >= 2) else dasar
+    if st.session_state.excluded_subgroups:
+        st.caption(f"Menggunakan data aktif ({len(data_uji)} subgrup) setelah mengeluarkan {len(st.session_state.excluded_subgroups)} subgrup penyebab khusus.")
+
     try:
-        _, res = hitung_peta_kendali(dasar)
+        _, res = hitung_peta_kendali(data_uji)
     except Exception as e:
         st.error(str(e))
         return
@@ -951,13 +926,17 @@ def halaman_kapabilitas():
 
 def halaman_level_sigma():
     render_header(judul="Level Sigma")
-    dasar, _ = get_data_aktif()
+    dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    total_cacat = int(dasar["Jumlah Produk Cacat"].sum())
-    total_unit = int(dasar["Jumlah Unit Diperiksa"].sum())
+    data_uji = aktif if (aktif is not None and not aktif.empty) else dasar
+    if st.session_state.excluded_subgroups:
+        st.caption(f"Menghitung Level Sigma pada data aktif ({len(data_uji)} subgrup) setelah mengeluarkan {len(st.session_state.excluded_subgroups)} subgrup penyebab khusus.")
+
+    total_cacat = int(data_uji["Jumlah Produk Cacat"].sum())
+    total_unit = int(data_uji["Jumlah Unit Diperiksa"].sum())
 
     try:
         dpo, dpmo, sigma = hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5)
@@ -1020,11 +999,11 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
         showarrow=True, arrowhead=2, arrowsize=1.8, arrowwidth=3, arrowcolor=MERAH
     )
 
-    fig.add_shape(type="rect", x0=8.45, y0=3.7, x1=10.6, y1=6.3, fillcolor=MERAH, line=dict(color=HITAM, width=2))
-    teks_kepala = "<br>".join([masalah_utama[i:i+20] for i in range(0, len(masalah_utama), 20)])
+    fig.add_shape(type="rect", x0=8.45, y0=3.5, x1=10.75, y1=6.5, fillcolor=MERAH, line=dict(color=HITAM, width=2))
+    teks_kepala = "<br>".join(textwrap.wrap(masalah_utama or "Masalah Utama", width=20))
     fig.add_annotation(
-        x=9.52, y=5.0, text=f"<b>{teks_kepala}</b>",
-        showarrow=False, font=dict(family="Poppins, sans-serif", color=PUTIH, size=12.5), align="center"
+        x=9.6, y=5.0, text=f"<b>{teks_kepala}</b>",
+        showarrow=False, font=dict(family="Poppins, sans-serif", color=PUTIH, size=12), align="center"
     )
 
     posisi_cabang = [
@@ -1061,7 +1040,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
 
     fig.update_layout(
         title=dict(text="<b>Diagram Sebab-Akibat (Fishbone) — PT XYZ</b>", font=dict(family="Poppins, sans-serif", color=HITAM)),
-        xaxis=dict(range=[0, 10.9], visible=False),
+        xaxis=dict(range=[0, 11.0], visible=False),
         yaxis=dict(range=[0, 10.0], visible=False),
         paper_bgcolor=PUTIH, plot_bgcolor=PUTIH,
         height=620, margin=dict(l=15, r=15, t=55, b=15)
@@ -1075,7 +1054,7 @@ def halaman_fishbone():
 
     masalah_utama = st.text_input(
         "Akibat / Masalah Utama (Kepala Ikan):",
-        value="Tingginya Produk Cacat Bata Ringan AAC"
+        value=st.session_state.fishbone_problem
     )
 
     kategori_list = [
@@ -1097,6 +1076,7 @@ def halaman_fishbone():
             )
 
     if st.button("Buat Gambar Diagram Fishbone & Simpan", use_container_width=True):
+        st.session_state.fishbone_problem = masalah_utama
         st.session_state.fishbone_inputs = input_baru
         st.session_state.fishbone_generated = True
         st.markdown('<div class="interp-box interp-yellow">Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.</div>', unsafe_allow_html=True)
@@ -1110,7 +1090,7 @@ def halaman_fishbone():
 
     if st.session_state.fishbone_generated or total_penyebab > 0:
         st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-        fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
+        fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=st.session_state.fishbone_problem)
         st.plotly_chart(fig_fb, use_container_width=True)
 
 def kategori_prioritas_rpn(rpn):
@@ -1164,10 +1144,13 @@ def halaman_fmea():
     df_base = pd.DataFrame(daftar_fishbone)
 
     if not st.session_state.fmea_scores.empty and "Failure Mode / Penyebab Kegagalan" in st.session_state.fmea_scores.columns:
+        skor_unik = st.session_state.fmea_scores[
+            ["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan", "Dampak Kegagalan", "Severity", "Occurrence", "Usulan Perbaikan"]
+        ].drop_duplicates(subset=["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan"])
         df_merged = pd.merge(
             df_base,
-            st.session_state.fmea_scores[["Failure Mode / Penyebab Kegagalan", "Dampak Kegagalan", "Severity", "Occurrence", "Usulan Perbaikan"]],
-            on="Failure Mode / Penyebab Kegagalan",
+            skor_unik,
+            on=["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan"],
             how="left"
         )
     else:
