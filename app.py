@@ -13,10 +13,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 5 Warna Solid (Merah Marun Tua, Kuning Emas, Putih, Biru, Hitam)
-MERAH = "#7F1D1D"
+# Palet Warna 5 Warna Solid (Merah Marun Pekat/Bold, Kuning Emas, Putih, Biru, Hitam)
 MERAH = "#5C0A0A"
 MERAH_HOVER = "#420606"
+KUNING = "#F5C518"
 BIRU = "#2563EB"
 HITAM = "#1A1C20"
 PUTIH = "#FFFFFF"
@@ -72,7 +72,7 @@ span[data-baseweb="tag"] {{
     color: {PUTIH} !important;
 }}
 
-/* Sidebar 1 Warna Merah Marun Tua Solid & Terkunci */
+/* Sidebar 1 Warna Merah Marun Pekat Solid & Terkunci */
 [data-testid="stSidebar"] {{
     background: {MERAH} !important;
     background-color: {MERAH} !important;
@@ -192,7 +192,7 @@ span[data-baseweb="tag"] {{
     display: none !important;
 }}
 
-/* Header Banner Seragam Berwarna Merah Marun Tua & Tinggi Lebih Proporsional + Shadow Jelas */
+/* Header Banner Seragam Berwarna Merah Marun Pekat & Tinggi Lebih Proporsional + Shadow Jelas */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
@@ -201,7 +201,7 @@ span[data-baseweb="tag"] {{
     padding: 23px 26px;
     min-height: 86px;
     border-radius: 14px;
-    box-shadow: 0 10px 26px rgba(26, 28, 32, 0.18);
+    box-shadow: 0 10px 26px rgba(26, 28, 32, 0.20);
     border: 1px solid rgba(255, 255, 255, 0.14);
     margin-bottom: 20px;
     gap: 18px;
@@ -393,7 +393,7 @@ div.stDownloadButton > button {{
     padding: 0 1.2rem !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
-    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.16) !important;
+    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.18) !important;
     width: 100% !important;
     margin: 0 !important;
 }}
@@ -419,7 +419,7 @@ div.stDownloadButton > button:hover {{
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.16) !important;
+    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.18) !important;
     cursor: pointer !important;
     width: 100% !important;
     box-sizing: border-box !important;
