@@ -586,7 +586,7 @@ def validasi_data_produksi(data):
         if not np.all(np.isclose(df[c], np.round(df[c]))):
             raise ValueError(f"Kolom {c} harus berisi bilangan bulat.")
         df[c] = df[c].astype(int)
-    return df.sort_values("Tanggal").reset_index(drop=True)
+    return df.reset_index(drop=True)
 
 def buat_template_excel():
     contoh = pd.DataFrame({
@@ -605,35 +605,42 @@ def get_data_aktif():
     dasar = st.session_state.df_produksi.copy()
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
     dikeluarkan = {x["Subgrup"] for x in st.session_state.excluded_subgroups}
-    aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy()
+    aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
     return dasar, aktif
 
 def hitung_peta_kendali(df_input):
-    """Menghitung batas kendali P-Chart dan Laney P' sesuai rumus Excel skripsi."""
+    """Menghitung batas kendali P-Chart dan Laney P' secara dinamis sesuai data aktif."""
     df = df_input.copy()
     if len(df) < 2:
         raise ValueError("Minimal diperlukan dua subgrup untuk menghitung moving range.")
     if "Subgrup" not in df:
         df["Subgrup"] = np.arange(1, len(df) + 1)
 
+    df = df.reset_index(drop=True)
+    total_cacat = float(df["Jumlah Produk Cacat"].sum())
+    total_unit = float(df["Jumlah Unit Diperiksa"].sum())
+    if total_unit <= 0:
+        raise ValueError("Total unit diperiksa harus lebih besar dari 0.")
+
     df["p_i"] = df["Jumlah Produk Cacat"] / df["Jumlah Unit Diperiksa"]
-    p_bar = float(df["Jumlah Produk Cacat"].sum() / df["Jumlah Unit Diperiksa"].sum())
-    df["sigma_pi"] = np.sqrt(p_bar * (1 - p_bar) / df["Jumlah Unit Diperiksa"])
-    if (df["sigma_pi"] == 0).any():
+    p_bar = total_cacat / total_unit
+    df["sigma_pi"] = np.sqrt(p_bar * (1.0 - p_bar) / df["Jumlah Unit Diperiksa"])
+    if (df["sigma_pi"] <= 0).any():
         raise ValueError("Simpangan baku proporsi bernilai nol; periksa proporsi cacat.")
     df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
 
-    df = df.sort_values("Subgrup").reset_index(drop=True)
-    df["R_i"] = df["z_i"].diff().abs()
-    valid_mr = df["R_i"].dropna()
-    R_bar = float(valid_mr.mean()) if len(valid_mr) else 0.0
+    # Moving Range berurutan pada data yang tersisa di tahap ini
+    z_arr = df["z_i"].to_numpy(dtype=float)
+    mr_vals = np.abs(np.diff(z_arr))
+    df["R_i"] = np.concatenate([[np.nan], mr_vals])
+    R_bar = float(np.mean(mr_vals)) if len(mr_vals) > 0 else 0.0
     sigma_z = R_bar / 1.128
-    overdispersi = sigma_z > 1
+    overdispersi = sigma_z > 1.0
 
-    df["BKA_P"] = np.minimum(1, p_bar + 3 * df["sigma_pi"])
-    df["BKB_P"] = np.maximum(0, p_bar - 3 * df["sigma_pi"])
-    df["BKA_Laney"] = np.minimum(1, p_bar + 3 * sigma_z * df["sigma_pi"])
-    df["BKB_Laney"] = np.maximum(0, p_bar - 3 * sigma_z * df["sigma_pi"])
+    df["BKA_P"] = np.minimum(1.0, p_bar + 3.0 * df["sigma_pi"])
+    df["BKB_P"] = np.maximum(0.0, p_bar - 3.0 * df["sigma_pi"])
+    df["BKA_Laney"] = np.minimum(1.0, p_bar + 3.0 * sigma_z * df["sigma_pi"])
+    df["BKB_Laney"] = np.maximum(0.0, p_bar - 3.0 * sigma_z * df["sigma_pi"])
 
     if overdispersi:
         df["BKA_Aktif"] = df["BKA_Laney"]
@@ -809,16 +816,17 @@ def halaman_peta_kendali():
                 st.session_state.excluded_subgroups = []
                 st.rerun()
 
+    # Tahapan terbentuk dinamis sesuai jumlah iterasi/penyebab khusus yang dikeluarkan pada data yang diunggah
     semua_tahap = [[]]
     kumulatif = []
     for dikeluarkan_tahap in st.session_state.riwayat_iterasi:
-        kumulatif = kumulatif + dikeluarkan_tahap
+        kumulatif = kumulatif + list(dikeluarkan_tahap)
         semua_tahap.append(list(kumulatif))
 
     for idx, dikeluarkan in enumerate(semua_tahap):
         tahap_ke = idx + 1
         is_tahap_terakhir = (idx == len(semua_tahap) - 1)
-        df_tahap = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy()
+        df_tahap = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
 
         if idx > 0:
             st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
