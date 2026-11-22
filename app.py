@@ -25,6 +25,13 @@ st.markdown(f"""
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
+:root {{
+    --primary-color: {MERAH} !important;
+    --background-color: {ABU_BG} !important;
+    --secondary-background-color: {PUTIH} !important;
+    --text-color: {HITAM} !important;
+}}
+
 /* Terapkan Poppins ke seluruh teks tanpa merusak Material Icon bawaan Streamlit */
 html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, button, table, th, td {{
     font-family: 'Poppins', sans-serif !important;
@@ -45,9 +52,25 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     max-width: 1380px;
 }}
 
-/* Sidebar Terkunci & Header Putih PT XYZ */
+/* Hilangkan seluruh aksen warna pink/merah muda bawaan Streamlit */
+*:focus, *:focus-visible {{
+    outline-color: {HITAM} !important;
+    box-shadow: none !important;
+}}
+div[data-baseweb="input"]:focus-within,
+div[data-baseweb="textarea"]:focus-within,
+div[data-baseweb="select"] > div:focus-within {{
+    border-color: {HITAM} !important;
+    box-shadow: 0 0 0 1px {HITAM} !important;
+}}
+span[data-baseweb="tag"] {{
+    background-color: {MERAH} !important;
+    color: {PUTIH} !important;
+}}
+
+/* Sidebar Terkunci & Header Putih PT XYZ sejajar tombol << */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 64px, {HITAM} 64px, {HITAM} 100%) !important;
+    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 62px, {HITAM} 62px, {HITAM} 100%) !important;
     border-right: 1px solid #E5E7EB;
     height: 100vh !important;
     max-height: 100vh !important;
@@ -59,11 +82,32 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
-    padding-top: 0.6rem !important;
+    padding-top: 0 !important;
     padding-bottom: 0.6rem !important;
 }}
 
-/* Tombol Buka-Tutup Sidebar agar Bersih & Kontras (Tanpa Teks Rusak) */
+/* Area Header Putih di atas Sidebar: tampilkan PT XYZ di kiri, tombol << di kanan */
+[data-testid="stSidebarHeader"] {{
+    background-color: {PUTIH} !important;
+    height: 62px !important;
+    min-height: 62px !important;
+    padding: 0 14px 0 18px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    margin-bottom: 10px !important;
+}}
+[data-testid="stSidebarHeader"]::before {{
+    content: "PT XYZ";
+    font-family: 'Poppins', sans-serif !important;
+    font-size: 19px;
+    font-weight: 800;
+    color: {HITAM};
+    letter-spacing: 0.4px;
+    line-height: 1;
+}}
+
+/* Tombol Buka-Tutup Sidebar agar Bersih & Kontras */
 [data-testid="stSidebarCollapseButton"] button,
 [data-testid="collapsedControl"] button {{
     background-color: {HITAM} !important;
@@ -87,27 +131,13 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     color: {PUTIH} !important;
 }}
 
-/* Tulisan PT XYZ Saja di Pojok Kiri Atas */
-.sidebar-logo {{
-    text-align: left;
-    padding: 4px 14px 14px 14px;
-    margin-bottom: 8px;
-}}
-.logo-title {{
-    font-size: 20px;
-    font-weight: 800;
-    color: {HITAM} !important;
-    letter-spacing: 0.4px;
-    line-height: 1.2;
-}}
-
 /* Menu Radio di Sidebar (Tanpa Emotikon) */
 [data-testid="stSidebar"] .stRadio > label {{
     display: none !important;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] {{
     gap: 4px !important;
-    padding: 0 8px;
+    padding: 4px 10px 0 10px;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label {{
     background-color: transparent;
@@ -140,25 +170,37 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     display: none !important;
 }}
 
-/* Header Banner Tiap Halaman: Ringkas, Font Lebih Kecil, & Shadow Halus */
+/* Header Banner Tiap Halaman: Ramping, Font Proporsional, & Shadow Jelas */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: {PUTIH};
-    padding: 12px 22px;
+    padding: 13px 22px;
     border-radius: 14px;
-    box-shadow: 0 4px 16px rgba(26, 28, 32, 0.08);
+    box-shadow: 0 6px 20px rgba(26, 28, 32, 0.10);
     border: 1px solid #E5E7EB;
     margin-bottom: 18px;
-    gap: 14px;
+    gap: 16px;
+}}
+.header-text-wrap {{
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
 }}
 .header-title {{
-    font-size: 18.5px;
-    font-weight: 700;
-    color: {HITAM};
-    margin: 0;
-    line-height: 1.25;
+    font-size: 18.5px !important;
+    font-weight: 700 !important;
+    color: {HITAM} !important;
+    margin: 0 !important;
+    line-height: 1.25 !important;
+}}
+.header-subtitle {{
+    font-size: 12.5px !important;
+    font-weight: 400 !important;
+    color: {ABU_TEKS} !important;
+    margin: 0 !important;
+    line-height: 1.4 !important;
 }}
 .period-badge {{
     display: inline-flex;
@@ -175,7 +217,7 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     flex-shrink: 0;
 }}
 
-/* Menyamakan Tinggi & Lebar Kolom KPI */
+/* Menyamakan Tinggi & Lebar Kolom */
 div[data-testid="stHorizontalBlock"] {{
     align-items: stretch !important;
 }}
@@ -187,9 +229,7 @@ div[data-testid="stColumn"] {{
 div[data-testid="column"] > div,
 div[data-testid="stColumn"] > div,
 div[data-testid="column"] [data-testid="stVerticalBlock"],
-div[data-testid="stColumn"] [data-testid="stVerticalBlock"],
-div[data-testid="column"] [data-testid="stMarkdownContainer"],
-div[data-testid="stColumn"] [data-testid="stMarkdownContainer"] {{
+div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     flex: 1 1 auto !important;
     display: flex !important;
     flex-direction: column !important;
@@ -203,7 +243,7 @@ div[data-testid="stColumn"] [data-testid="stMarkdownContainer"] {{
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 3px 12px rgba(26, 28, 32, 0.05);
+    box-shadow: 0 4px 14px rgba(26, 28, 32, 0.06);
     border: 1px solid #E5E7EB;
     position: relative;
     overflow: hidden;
@@ -278,14 +318,21 @@ div[data-testid="stColumn"] [data-testid="stMarkdownContainer"] {{
     overflow-wrap: anywhere;
 }}
 
-/* Kartu Putih Umum */
+/* Kartu Putih Umum & Kartu Beranda Seragam */
 .action-card {{
     background: {PUTIH};
     border-radius: 14px;
-    padding: 18px 22px 14px 22px;
-    box-shadow: 0 3px 12px rgba(26, 28, 32, 0.05);
+    padding: 18px 22px 16px 22px;
+    box-shadow: 0 4px 14px rgba(26, 28, 32, 0.06);
     border: 1px solid #E5E7EB;
     margin-bottom: 12px;
+    flex: 1 1 auto;
+}}
+.home-card {{
+    min-height: 126px;
+    display: flex;
+    flex-direction: column;
+    justify-content: center;
 }}
 .action-header {{
     display: flex;
@@ -315,8 +362,83 @@ div[data-testid="stColumn"] [data-testid="stMarkdownContainer"] {{
 .action-desc {{
     font-size: 13px;
     color: {ABU_TEKS};
-    margin-bottom: 8px;
+    margin: 0;
     line-height: 1.55;
+}}
+.fmea-guide-text {{
+    font-size: 12.5px;
+    color: {HITAM};
+    line-height: 1.6;
+    margin-bottom: 4px;
+}}
+
+/* Menyamakan Ukuran & Tampilan Tombol Download & Upload di Beranda */
+div.stButton > button,
+div.stDownloadButton > button {{
+    background-color: {MERAH} !important;
+    color: {PUTIH} !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    padding: 0 1.2rem !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    box-shadow: 0 4px 10px rgba(215, 25, 32, 0.24) !important;
+    width: 100% !important;
+}}
+div.stButton > button:hover,
+div.stDownloadButton > button:hover {{
+    background-color: #B01218 !important;
+    color: {PUTIH} !important;
+}}
+
+/* Kotak File Uploader Disamakan Persis dengan Tombol Merah Download Template */
+[data-testid="stFileUploader"] {{
+    width: 100% !important;
+}}
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
+    background-color: {MERAH} !important;
+    border: none !important;
+    border-radius: 10px !important;
+    height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
+    padding: 0 16px !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    box-shadow: 0 4px 10px rgba(215, 25, 32, 0.24) !important;
+    cursor: pointer !important;
+}}
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"]:hover {{
+    background-color: #B01218 !important;
+}}
+[data-testid="stFileUploaderDropzoneInstructions"] {{
+    display: none !important;
+}}
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button {{
+    background-color: transparent !important;
+    border: none !important;
+    color: {PUTIH} !important;
+    font-size: 13.5px !important;
+    font-weight: 600 !important;
+    padding: 0 !important;
+    margin: 0 !important;
+    box-shadow: none !important;
+    width: 100% !important;
+    height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
+}}
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button *,
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
+[data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] svg {{
+    color: {PUTIH} !important;
+    fill: {PUTIH} !important;
+    opacity: 1 !important;
 }}
 
 /* Kotak Interpretasi Palet 5 Warna */
@@ -352,20 +474,6 @@ textarea::placeholder, input::placeholder {{
     opacity: 1 !important;
 }}
 
-/* Tombol Merah Solid */
-div.stButton > button, div.stDownloadButton > button {{
-    background-color: {MERAH} !important;
-    color: {PUTIH} !important;
-    border: none !important;
-    border-radius: 10px !important;
-    padding: 0.6rem 1.2rem !important;
-    font-weight: 600 !important;
-    box-shadow: 0 3px 8px rgba(215, 25, 32, 0.25);
-}}
-div.stButton > button:hover, div.stDownloadButton > button:hover {{
-    background-color: #B01218 !important;
-    color: {PUTIH} !important;
-}}
 h1, h2, h3 {{ color: {HITAM}; }}
 </style>
 """, unsafe_allow_html=True)
@@ -393,7 +501,7 @@ if "fmea_scores" not in st.session_state:
 
 CALENDAR_SVG = '<svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="#1A1C20" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>'
 
-def render_header(judul="Six Sigma Dashboard"):
+def render_header(judul="Six Sigma Dashboard", subjudul=None):
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
         tgl_awal = df["Tanggal"].min().strftime("%b %Y")
@@ -402,9 +510,10 @@ def render_header(judul="Six Sigma Dashboard"):
     else:
         periode_teks = "Menunggu Data"
 
+    sub_html = f'<div class="header-subtitle">{subjudul}</div>' if subjudul else ""
     html = (
         f'<div class="dashboard-header">'
-        f'<h1 class="header-title">{judul}</h1>'
+        f'<div class="header-text-wrap"><div class="header-title">{judul}</div>{sub_html}</div>'
         f'<div class="period-badge">{CALENDAR_SVG} <span>Periode Analisis: {periode_teks}</span></div>'
         f'</div>'
     )
@@ -577,7 +686,10 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
     return dpo, dpmo, sigma
 
 def halaman_beranda():
-    render_header(judul="Six Sigma Dashboard")
+    render_header(
+        judul="Six Sigma Dashboard",
+        subjudul="Dashboard ini bertujuan untuk memantau dan menganalisis pengendalian kualitas produksi bata ringan AAC pada PT XYZ menggunakan pendekatan Six Sigma."
+    )
 
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
@@ -598,7 +710,13 @@ def halaman_beranda():
 
     col_kiri, col_kanan = st.columns(2)
     with col_kiri:
-        st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">⬇</div><h3 class="action-title">Template Data Excel</h3></div><p class="action-desc">Unduh template untuk memasukkan data produksi dan kecacatan sesuai format standar.</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="action-card home-card">'
+            '<div class="action-header"><div class="action-badge">⬇</div><h3 class="action-title">Template Data Excel</h3></div>'
+            '<p class="action-desc">Unduh template untuk memasukkan data produksi dan kecacatan sesuai format standar.</p>'
+            '</div>',
+            unsafe_allow_html=True
+        )
         st.download_button(
             "Download Template.xlsx",
             data=buat_template_excel(),
@@ -608,9 +726,15 @@ def halaman_beranda():
         )
 
     with col_kanan:
-        st.markdown('<div class="action-card"><div class="action-header"><div class="action-badge">☁</div><h3 class="action-title">Unggah Data</h3></div><p class="action-desc">Upload file Excel (.xlsx) yang sudah diisi sesuai template untuk memulai analisis.</p></div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="action-card home-card">'
+            '<div class="action-header"><div class="action-badge">☁</div><h3 class="action-title">Unggah Data</h3></div>'
+            '<p class="action-desc">Upload file Excel (.xlsx) yang sudah diisi sesuai template untuk memulai analisis.</p>'
+            '</div>',
+            unsafe_allow_html=True
+        )
         file = st.file_uploader(
-            "Pilih file Excel (.xlsx)",
+            "Upload File Excel (.xlsx)",
             type=["xlsx", "xls"],
             key="file_produksi",
             label_visibility="collapsed"
@@ -941,9 +1065,9 @@ def halaman_fishbone():
 def kategori_prioritas_rpn(rpn):
     if pd.isna(rpn):
         return "-"
-    if rpn >= 50:
+    if rpn >= 12:
         return "Prioritas Tinggi (Segera Diperbaiki)"
-    elif rpn >= 25:
+    elif rpn >= 6:
         return "Prioritas Sedang (Perlu Pengendalian)"
     else:
         return "Prioritas Rendah (Pemantauan Rutin)"
@@ -951,17 +1075,27 @@ def kategori_prioritas_rpn(rpn):
 def halaman_fmea():
     render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
-    st.markdown(
+    panduan_html = (
         '<div class="action-card">'
         '<div class="action-header"><div class="action-badge">i</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
-        '<p class="action-desc">'
-        '• <b>Failure Mode / Potensi Kegagalan</b> di bawah ini ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
-        '• <b>Severity (S) [Skala 1–10]:</b> Tingkat keparahan dampak kecacatan terhadap kualitas produk maupun proses produksi berikutnya (<i>1 = dampak sangat ringan/tidak terasa, 10 = dampak sangat fatal/produk ditolak total</i>).<br>'
-        '• <b>Occurrence (O) [Skala 1–10]:</b> Tingkat keseringan atau peluang munculnya penyebab kegagalan selama proses produksi (<i>1 = sangat jarang terjadi, 10 = hampir selalu terjadi</i>).<br>'
-        '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–100):</b> Semakin tinggi nilai RPN, semakin kritis risiko kegagalan tersebut dan harus menjadi <b>prioritas utama perbaikan</b> (<i>&ge; 50: Prioritas Tinggi | 25–49: Prioritas Sedang | &lt; 25: Prioritas Rendah</i>).'
-        '</p></div>',
-        unsafe_allow_html=True
+        '<div class="fmea-guide-text">'
+        '• <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
+        '• <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>'
+        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>'
+        '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>'
+        '&nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.'
+        '</div></div>'
     )
+    st.markdown(panduan_html, unsafe_allow_html=True)
 
     daftar_fishbone = []
     for kat, teks in st.session_state.fishbone_inputs.items():
@@ -993,8 +1127,8 @@ def halaman_fmea():
         df_merged["Usulan Perbaikan"] = ""
 
     df_merged["Dampak Kegagalan"] = df_merged["Dampak Kegagalan"].fillna("")
-    df_merged["Severity"] = df_merged["Severity"].fillna(1).astype(int)
-    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).astype(int)
+    df_merged["Severity"] = df_merged["Severity"].fillna(1).clip(1, 5).astype(int)
+    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).clip(1, 4).astype(int)
     df_merged["Usulan Perbaikan"] = df_merged["Usulan Perbaikan"].fillna("")
     df_merged["RPN (S × O)"] = df_merged["Severity"] * df_merged["Occurrence"]
     df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
@@ -1008,8 +1142,8 @@ def halaman_fmea():
             "Kategori (5M & 1E)": st.column_config.TextColumn("Kategori (5M & 1E)", disabled=True),
             "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn("Failure Mode / Penyebab Kegagalan", disabled=True),
             "Dampak Kegagalan": st.column_config.TextColumn("Dampak Kegagalan (Opsional)"),
-            "Severity": st.column_config.NumberColumn("Severity (1–10)", min_value=1, max_value=10, step=1, required=True),
-            "Occurrence": st.column_config.NumberColumn("Occurrence (1–10)", min_value=1, max_value=10, step=1, required=True),
+            "Severity": st.column_config.NumberColumn("Severity (1–5)", min_value=1, max_value=5, step=1, required=True),
+            "Occurrence": st.column_config.NumberColumn("Occurrence (1–4)", min_value=1, max_value=4, step=1, required=True),
             "RPN (S × O)": st.column_config.NumberColumn("RPN (S × O)", disabled=True),
             "Keterangan Prioritas": st.column_config.TextColumn("Keterangan Prioritas", disabled=True),
             "Usulan Perbaikan": st.column_config.TextColumn("Usulan Perbaikan")
@@ -1056,7 +1190,6 @@ MENU_ITEMS = {
 }
 
 with st.sidebar:
-    st.markdown('<div class="sidebar-logo"><div class="logo-title">PT XYZ</div></div>', unsafe_allow_html=True)
     pilihan_menu = st.radio("Navigasi", list(MENU_ITEMS.keys()), index=0)
 
 MENU_ITEMS[pilihan_menu]()
