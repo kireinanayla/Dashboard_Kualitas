@@ -332,6 +332,7 @@ if "fishbone_generated" not in st.session_state:
 if "fmea_scores" not in st.session_state:
     st.session_state.fmea_scores = pd.DataFrame()
 
+
 def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"):
     df = st.session_state.df_produksi
     if df is not None and not df.empty:
@@ -425,6 +426,7 @@ def get_data_aktif():
     dikeluarkan = {x["Subgrup"] for x in st.session_state.excluded_subgroups}
     aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy()
     return dasar, aktif
+
 
 def hitung_peta_kendali(df_input):
     """Menghitung batas kendali P-Chart dan Laney P' sesuai rumus Excel skripsi."""
@@ -520,6 +522,7 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
         sigma = float(norm.ppf(1 - dpmo / 1_000_000) + shift)
     return dpo, dpmo, sigma
 
+
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
@@ -597,6 +600,7 @@ def halaman_beranda():
         tampil["Tanggal"] = tampil["Tanggal"].dt.strftime("%Y-%m-%d")
         st.dataframe(tampil, use_container_width=True, hide_index=True)
 
+
 def halaman_overdispersi():
     render_header(
         judul="Identifikasi Overdispersi",
@@ -631,6 +635,7 @@ def halaman_overdispersi():
     tabel["Tanggal"] = pd.to_datetime(tabel["Tanggal"]).dt.strftime("%Y-%m-%d")
     st.markdown("### Tabel Perhitungan")
     st.dataframe(tabel, use_container_width=True, hide_index=True)
+
 
 def halaman_peta_kendali():
     render_header(
@@ -733,6 +738,7 @@ def halaman_peta_kendali():
                         })
                     st.rerun()
 
+
 def halaman_runs_test():
     render_header(
         judul="Uji Keacakan (Runs Test)",
@@ -768,6 +774,7 @@ def halaman_runs_test():
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
 
+
 def halaman_kapabilitas():
     render_header(
         judul="Indeks Kapabilitas Proses",
@@ -795,6 +802,7 @@ def halaman_kapabilitas():
         st.success("Interpretasi berdasarkan batas P%pk ≥ 1: proses kapabel.")
     else:
         st.error("Interpretasi berdasarkan batas P%pk < 1: proses belum kapabel.")
+
 
 def halaman_level_sigma():
     render_header(
@@ -826,6 +834,7 @@ def halaman_level_sigma():
     st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
     st.latex(r"DPMO = DPO \times 10^6")
     st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
+
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -941,6 +950,7 @@ def halaman_fishbone():
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
         st.plotly_chart(fig_fb, use_container_width=True)
 
+
 def kategori_prioritas_rpn(rpn):
     if pd.isna(rpn):
         return "-"
@@ -1053,6 +1063,7 @@ def halaman_fmea():
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
 
+
 MENU_ITEMS = {
     "🏠  Beranda (Input Data)": halaman_beranda,
     "📊  Identifikasi Overdispersi": halaman_overdispersi,
@@ -1062,34 +1073,6 @@ MENU_ITEMS = {
     "Σ   Level Sigma": halaman_level_sigma,
     "🐟  Diagram Sebab-Akibat": halaman_fishbone,
     "📋  FMEA": halaman_fmea
-}
-
-with st.sidebar:
-    st.markdown("""
-    <div class="sidebar-logo">
-        <div class="logo-bars">
-            <div class="bar-red"></div>
-            <div class="bar-yellow"></div>
-        </div>
-        <div class="logo-title">PT XYZ</div>
-        <div class="logo-sub">Building a Better Future</div>
-    </div>
-    """, unsafe_allow_html=True)
-
-    pilihan_menu = st.radio("Navigasi", list(MENU_ITEMS.keys()), index=0)
-
-
-MENU_ITEMS[pilihan_menu]()
-
-MENU_ITEMS = {
-    "Beranda (Input Data)": halaman_beranda,
-    "Identifikasi Overdispersi": halaman_overdispersi,
-    "Peta Kendali": halaman_peta_kendali,
-    "Uji Keacakan (Runs Test)": halaman_runs_test,
-    "Indeks Kapabilitas Proses": halaman_kapabilitas,
-    "Level Sigma": halaman_level_sigma,
-    "Diagram Sebab-Akibat": halaman_fishbone,
-    "FMEA": halaman_fmea
 }
 
 with st.sidebar:
