@@ -13,12 +13,11 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 5 Warna Solid (Biru, Merah Marun Pekat tanpa kesan pink, Kuning, Putih, Hitam)
-BIRU = "#1E3A8A"
-BIRU_TERANG = "#2563EB"
-MERAH = "#8B0000"
-MERAH_HOVER = "#660000"
+# Palet Warna 5 Warna Solid (Merah Marun Tua, Kuning Emas, Putih, Biru, Hitam)
+MERAH = "#7F1D1D"
+MERAH_HOVER = "#631515"
 KUNING = "#F5C518"
+BIRU = "#2563EB"
 HITAM = "#1A1C20"
 PUTIH = "#FFFFFF"
 ABU_BG = "#F4F5F7"
@@ -29,7 +28,7 @@ st.markdown(f"""
 @import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
 
 :root {{
-    --primary-color: {BIRU} !important;
+    --primary-color: {MERAH} !important;
     --background-color: {ABU_BG} !important;
     --secondary-background-color: {PUTIH} !important;
     --text-color: {HITAM} !important;
@@ -50,33 +49,33 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     color: {HITAM};
 }}
 
-/* Beri jarak lega di atas header agar tidak terpotong bilah atas */
+/* Jarak atas lega agar header tidak terpotong */
 .block-container {{
     padding-top: 3.2rem !important;
     padding-bottom: 2rem !important;
     max-width: 1380px;
 }}
 
-/* Hilangkan seluruh aksen warna pink/merah muda bawaan Streamlit */
+/* Hilangkan seluruh aksen fokus bawaan Streamlit */
 *:focus, *:focus-visible {{
-    outline-color: {BIRU} !important;
+    outline-color: {MERAH} !important;
     box-shadow: none !important;
 }}
 div[data-baseweb="input"]:focus-within,
 div[data-baseweb="textarea"]:focus-within,
 div[data-baseweb="select"] > div:focus-within {{
-    border-color: {BIRU} !important;
-    box-shadow: 0 0 0 1px {BIRU} !important;
+    border-color: {MERAH} !important;
+    box-shadow: 0 0 0 1px {MERAH} !important;
 }}
 span[data-baseweb="tag"] {{
-    background-color: {BIRU} !important;
+    background-color: {MERAH} !important;
     color: {PUTIH} !important;
 }}
 
-/* Sidebar 1 Warna Biru Solid & Terkunci */
+/* Sidebar 1 Warna Merah Marun Tua Solid & Terkunci */
 [data-testid="stSidebar"] {{
-    background: {BIRU} !important;
-    background-color: {BIRU} !important;
+    background: {MERAH} !important;
+    background-color: {MERAH} !important;
     border-right: none !important;
     height: 100vh !important;
     max-height: 100vh !important;
@@ -85,7 +84,7 @@ span[data-baseweb="tag"] {{
 [data-testid="stSidebar"] > div:first-child,
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {{
-    background-color: {BIRU} !important;
+    background-color: {MERAH} !important;
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
@@ -93,17 +92,17 @@ span[data-baseweb="tag"] {{
     padding-bottom: 0.6rem !important;
 }}
 
-/* Header Sidebar: Judul "Dashboard Kualitas Produksi PT XYZ" lebih besar & jarak lega ke Beranda */
+/* Header Sidebar: Judul "Dashboard Kualitas Produksi PT XYZ", jarak lega ke garis putih, lalu jarak lega ke menu */
 [data-testid="stSidebarHeader"] {{
-    background-color: {BIRU} !important;
-    min-height: 88px !important;
-    padding: 20px 14px 20px 18px !important;
+    background-color: {MERAH} !important;
+    min-height: 112px !important;
+    padding: 22px 14px 30px 18px !important;
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
     gap: 10px !important;
-    margin-bottom: 34px !important;
-    border-bottom: 1px solid rgba(255, 255, 255, 0.18) !important;
+    margin-bottom: 24px !important;
+    border-bottom: 1.5px solid rgba(255, 255, 255, 0.32) !important;
 }}
 [data-testid="stSidebarHeader"]::before {{
     content: "Dashboard Kualitas Produksi PT XYZ";
@@ -111,13 +110,13 @@ span[data-baseweb="tag"] {{
     font-size: 16.5px;
     font-weight: 700;
     color: {PUTIH};
-    line-height: 1.35;
+    line-height: 1.4;
     max-width: 190px;
 }}
 
-/* Tombol Buka-Tutup Sidebar menyatu rapi */
+/* Tombol Buka-Tutup Sidebar */
 [data-testid="stSidebarCollapseButton"] button {{
-    background-color: rgba(255, 255, 255, 0.15) !important;
+    background-color: rgba(255, 255, 255, 0.16) !important;
     color: {PUTIH} !important;
     border: none !important;
     border-radius: 8px !important;
@@ -135,16 +134,16 @@ span[data-baseweb="tag"] {{
     color: {HITAM} !important;
 }}
 [data-testid="collapsedControl"] button {{
-    background-color: {BIRU} !important;
+    background-color: {MERAH} !important;
     color: {PUTIH} !important;
     border: none !important;
     border-radius: 8px !important;
     width: 34px !important;
     height: 34px !important;
-    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2) !important;
 }}
 [data-testid="collapsedControl"] button:hover {{
-    background-color: {MERAH} !important;
+    background-color: {MERAH_HOVER} !important;
 }}
 [data-testid="stSidebarCollapseButton"] svg,
 [data-testid="collapsedControl"] svg,
@@ -154,13 +153,13 @@ span[data-baseweb="tag"] {{
     color: {PUTIH} !important;
 }}
 
-/* Menu Radio di Sidebar (Tanpa Emotikon & Diberi Jarak dari Judul) */
+/* Menu Radio di Sidebar */
 [data-testid="stSidebar"] .stRadio > label {{
     display: none !important;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] {{
     gap: 6px !important;
-    padding: 8px 12px 0 12px !important;
+    padding: 4px 12px 0 12px !important;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label {{
     background-color: transparent;
@@ -176,12 +175,12 @@ span[data-baseweb="tag"] {{
     font-weight: 500;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label:hover {{
-    background-color: rgba(255, 255, 255, 0.12);
+    background-color: rgba(255, 255, 255, 0.14);
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"],
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {{
     background-color: {KUNING} !important;
-    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.22);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.24);
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] p,
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {{
@@ -193,35 +192,36 @@ span[data-baseweb="tag"] {{
     display: none !important;
 }}
 
-/* Header Banner Seragam Berwarna Biru di Semua Halaman + Shadow */
+/* Header Banner Seragam Berwarna Merah Marun Tua & Tinggi Lebih Proporsional + Shadow Jelas */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
     align-items: center;
-    background: {BIRU};
-    padding: 17px 24px;
+    background: {MERAH};
+    padding: 23px 26px;
+    min-height: 86px;
     border-radius: 14px;
-    box-shadow: 0 8px 22px rgba(30, 58, 138, 0.22);
-    border: 1px solid rgba(255, 255, 255, 0.12);
-    margin-bottom: 18px;
-    gap: 16px;
+    box-shadow: 0 10px 26px rgba(26, 28, 32, 0.18);
+    border: 1px solid rgba(255, 255, 255, 0.14);
+    margin-bottom: 20px;
+    gap: 18px;
 }}
 .header-text-wrap {{
     display: flex;
     flex-direction: column;
-    gap: 4px;
+    gap: 5px;
 }}
 .header-title {{
-    font-size: 19px !important;
+    font-size: 20px !important;
     font-weight: 700 !important;
     color: {PUTIH} !important;
     margin: 0 !important;
     line-height: 1.25 !important;
 }}
 .header-subtitle {{
-    font-size: 12.5px !important;
+    font-size: 12.8px !important;
     font-weight: 400 !important;
-    color: rgba(255, 255, 255, 0.88) !important;
+    color: rgba(255, 255, 255, 0.90) !important;
     margin: 0 !important;
     line-height: 1.45 !important;
 }}
@@ -232,12 +232,13 @@ span[data-baseweb="tag"] {{
     background: {PUTIH};
     border: 1px solid rgba(255, 255, 255, 0.4);
     border-radius: 9px;
-    padding: 6px 13px;
+    padding: 7px 14px;
     font-size: 12px;
     font-weight: 600;
     color: {HITAM};
     white-space: nowrap;
     flex-shrink: 0;
+    box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }}
 
 /* Menyamakan Tinggi & Lebar Kolom */
@@ -258,7 +259,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     flex-direction: column !important;
 }}
 
-/* Kartu KPI Seragam Panjang & Lebarnya */
+/* Kartu KPI Seragam Satu Warna & Shadow Jelas di Atas Background Abu-Abu */
 .kpi-box {{
     background: {PUTIH};
     border-radius: 14px;
@@ -266,8 +267,8 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 4px 14px rgba(26, 28, 32, 0.06);
-    border: 1px solid #E5E7EB;
+    box-shadow: 0 8px 22px rgba(26, 28, 32, 0.11);
+    border: 1px solid #E2E5EA;
     position: relative;
     overflow: hidden;
     height: 112px;
@@ -276,38 +277,18 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     width: 100%;
     box-sizing: border-box;
 }}
-.kpi-box.accent-red::after {{
+.kpi-box::after {{
     content: "";
     position: absolute;
     bottom: 0; left: 0; right: 0;
     height: 5px;
     background-color: {MERAH};
 }}
-.kpi-box.accent-yellow::after {{
-    content: "";
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 5px;
-    background-color: {KUNING};
-}}
-.kpi-box.accent-dark::after {{
-    content: "";
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 5px;
-    background-color: {HITAM};
-}}
-.kpi-box.accent-blue::after {{
-    content: "";
-    position: absolute;
-    bottom: 0; left: 0; right: 0;
-    height: 5px;
-    background-color: {BIRU};
-}}
 .kpi-icon {{
     width: 44px;
     height: 44px;
     border-radius: 50%;
+    background-color: {MERAH};
     display: flex;
     align-items: center;
     justify-content: center;
@@ -316,9 +297,6 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     color: {PUTIH};
     flex-shrink: 0;
 }}
-.icon-dark {{ background-color: {HITAM}; }}
-.icon-red {{ background-color: {MERAH}; }}
-.icon-blue {{ background-color: {BIRU}; }}
 .kpi-content {{
     min-width: 0;
     flex: 1;
@@ -341,27 +319,27 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     overflow-wrap: anywhere;
 }}
 
-/* Kartu Putih Umum & Kartu Beranda Dikunci Sama Ukuran + Konten Pas di Tengah */
+/* Kartu Putih Umum & Kartu Beranda Lebih Tinggi agar Teks Tidak Keluar Garis + Shadow Jelas */
 .action-card {{
     background: {PUTIH};
     border-radius: 14px;
     padding: 20px 24px;
-    box-shadow: 0 4px 14px rgba(26, 28, 32, 0.06);
-    border: 1px solid #E5E7EB;
-    margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(26, 28, 32, 0.11);
+    border: 1px solid #E2E5EA;
+    margin-bottom: 14px;
     width: 100%;
     box-sizing: border-box;
 }}
 .home-card {{
-    height: 162px !important;
-    min-height: 162px !important;
-    max-height: 162px !important;
+    height: 192px !important;
+    min-height: 192px !important;
+    max-height: 192px !important;
     padding: 24px 26px !important;
     display: flex !important;
     flex-direction: column !important;
     justify-content: center !important;
     align-items: flex-start !important;
-    margin-bottom: 12px !important;
+    margin-bottom: 14px !important;
 }}
 .action-header {{
     display: flex;
@@ -393,7 +371,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     font-size: 13px;
     color: {ABU_TEKS};
     margin: 0;
-    line-height: 1.55;
+    line-height: 1.6;
 }}
 .fmea-guide-text {{
     font-size: 12.5px;
@@ -402,7 +380,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     margin-bottom: 4px;
 }}
 
-/* Tombol Download & Upload Merah Marun Gelap (#8B0000) Tegas Tanpa Kesan Pink */
+/* Tombol Download & Upload Seragam */
 div.stButton > button,
 div.stDownloadButton > button {{
     background-color: {MERAH} !important;
@@ -415,7 +393,7 @@ div.stDownloadButton > button {{
     padding: 0 1.2rem !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 10px rgba(26, 28, 32, 0.16) !important;
+    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.16) !important;
     width: 100% !important;
     margin: 0 !important;
 }}
@@ -425,7 +403,7 @@ div.stDownloadButton > button:hover {{
     color: {PUTIH} !important;
 }}
 
-/* Kotak File Uploader Disamakan Persis Panjang, Lebar, & Warna Merah Marun Gelap */
+/* Kotak File Uploader Disamakan Persis Panjang, Lebar, & Warna dengan Tombol Download */
 [data-testid="stFileUploader"] {{
     width: 100% !important;
     margin: 0 !important;
@@ -441,7 +419,7 @@ div.stDownloadButton > button:hover {{
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 10px rgba(26, 28, 32, 0.16) !important;
+    box-shadow: 0 6px 16px rgba(26, 28, 32, 0.16) !important;
     cursor: pointer !important;
     width: 100% !important;
     box-sizing: border-box !important;
@@ -476,17 +454,17 @@ div.stDownloadButton > button:hover {{
     opacity: 1 !important;
 }}
 
-/* Kotak Interpretasi Palet 5 Warna */
+/* Kotak Interpretasi dengan Shadow Jelas */
 .interp-box {{
     background: {PUTIH};
     border-radius: 12px;
-    padding: 15px 18px;
+    padding: 16px 20px;
     color: {HITAM};
     font-size: 13.5px;
     line-height: 1.65;
-    box-shadow: 0 3px 10px rgba(26, 28, 32, 0.05);
-    border: 1px solid #E5E7EB;
-    margin-bottom: 12px;
+    box-shadow: 0 8px 22px rgba(26, 28, 32, 0.11);
+    border: 1px solid #E2E5EA;
+    margin-bottom: 14px;
 }}
 .interp-red {{ border-left: 6px solid {MERAH}; }}
 .interp-blue {{ border-left: 6px solid {BIRU}; }}
@@ -554,10 +532,10 @@ def render_header(judul="Six Sigma Dashboard", subjudul=None):
     )
     st.markdown(html, unsafe_allow_html=True)
 
-def render_kpi(kolom, simbol, warna_ikon, aksen_bawah, label, nilai):
-    simbol_html = f'<div class="kpi-icon {warna_ikon}">{simbol}</div>' if simbol else ""
+def render_kpi(kolom, simbol, label, nilai):
+    simbol_html = f'<div class="kpi-icon">{simbol}</div>' if simbol else ""
     html = (
-        f'<div class="kpi-box {aksen_bawah}">'
+        f'<div class="kpi-box">'
         f'{simbol_html}'
         f'<div class="kpi-content"><div class="kpi-title">{label}</div><div class="kpi-number">{nilai}</div></div>'
         f'</div>'
@@ -740,11 +718,11 @@ def halaman_beranda():
         persen = 0.0
 
     k1, k2, k3 = st.columns(3)
-    render_kpi(k1, None, "", "accent-red", "Total Unit Diperiksa", format_angka(total_unit))
-    render_kpi(k2, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(k3, None, "", "accent-yellow", "Persentase Cacat", f"{persen:.2f}%")
+    render_kpi(k1, None, "Total Unit Diperiksa", format_angka(total_unit))
+    render_kpi(k2, None, "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(k3, None, "Persentase Cacat", f"{persen:.2f}%")
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 18px;'></div>", unsafe_allow_html=True)
 
     col_kiri, col_kanan = st.columns(2)
     with col_kiri:
@@ -801,12 +779,12 @@ def halaman_overdispersi():
         return
 
     a, b, c, d = st.columns(4)
-    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
-    render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
-    render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
-    render_kpi(d, None, "", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
+    render_kpi(a, "p̄", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
+    render_kpi(b, "R̄", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
+    render_kpi(c, "σz", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
+    render_kpi(d, None, "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if res["is_overdispersed"]:
         st.markdown(f'<div class="interp-box interp-yellow">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
     else:
@@ -842,7 +820,8 @@ def halaman_peta_kendali():
         is_tahap_terakhir = (idx == len(semua_tahap) - 1)
         df_tahap = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy()
 
-        st.markdown("---")
+        if idx > 0:
+            st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
         st.markdown(f"## Peta Kendali — Tahap {tahap_ke}")
         if dikeluarkan:
             st.caption(f"Subgrup yang telah dikeluarkan hingga tahap ini: **{', '.join(map(str, dikeluarkan))}**")
@@ -854,15 +833,15 @@ def halaman_peta_kendali():
             break
 
         a, b, c = st.columns(3)
-        render_kpi(a, None, "", "accent-dark", f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
-        render_kpi(b, None, "", "accent-yellow", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
-        render_kpi(c, None, "", "accent-red", "Subgrup Out of Control", str(res["jumlah_ooc"]))
+        render_kpi(a, None, f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
+        render_kpi(b, None, "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
+        render_kpi(c, None, "Subgrup Out of Control", str(res["jumlah_ooc"]))
 
-        st.markdown("<div style='height: 12px;'></div>", unsafe_allow_html=True)
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"], mode="lines", name="BKA", line=dict(color=MERAH, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=BIRU_TERANG, width=2)))
+        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=BIRU, width=2)))
         fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"], mode="lines", name="BKB", line=dict(color=KUNING, dash="dash", width=2)))
         fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat (pi)", line=dict(color=HITAM), marker=dict(size=7)))
 
@@ -917,19 +896,19 @@ def halaman_runs_test():
 
     alpha = 0.05
     a, b, c, d = st.columns(4)
-    render_kpi(a, "M", "icon-dark", "accent-dark", "Median Proporsi", f"{rt['median']:.5f}")
-    render_kpi(b, "V", "icon-dark", "accent-yellow", "Jumlah Runs (V)", str(rt["V"]))
-    render_kpi(c, "Z", "icon-dark", "accent-yellow", "Statistik Uji Z", f"{rt['Z']:.4f}")
-    render_kpi(d, "P", "icon-red", "accent-red", "P-value", f"{rt['p_value']:.4f}")
+    render_kpi(a, "M", "Median Proporsi", f"{rt['median']:.5f}")
+    render_kpi(b, "V", "Jumlah Runs (V)", str(rt["V"]))
+    render_kpi(c, "Z", "Statistik Uji Z", f"{rt['Z']:.4f}")
+    render_kpi(d, "P", "P-value", f"{rt['p_value']:.4f}")
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
         st.markdown('<div class="interp-box interp-red"><b>Keputusan: Tolak H₀.</b> Data tidak menyebar secara acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
     else:
         st.markdown('<div class="interp-box interp-blue"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU_TERANG)))
+    fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU)))
     fig.add_hline(y=rt["median"], line_dash="dash", line_color=KUNING, annotation_text=f"Median = {rt['median']:.5f}")
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
@@ -948,11 +927,11 @@ def halaman_kapabilitas():
         return
 
     a, b, c = st.columns(3)
-    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Proporsi Cacat (p̄)", f"{res['p_bar']:.5f}")
-    render_kpi(b, "Z", "icon-dark", "accent-yellow", "Nilai Normal Z(p̄)", f"{z_p:.5f}")
-    render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
+    render_kpi(a, "p̄", "Proporsi Cacat (p̄)", f"{res['p_bar']:.5f}")
+    render_kpi(b, "Z", "Nilai Normal Z(p̄)", f"{z_p:.5f}")
+    render_kpi(c, "C", "P%pk", f"{ppk:.5f}")
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     ppk_str = format_koma(ppk, 3)
     z_str = format_koma(z_p, 3)
     if ppk >= 1:
@@ -989,12 +968,12 @@ def halaman_level_sigma():
         return
 
     a, b, c, d = st.columns(4)
-    render_kpi(a, None, "", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
-    render_kpi(b, None, "", "accent-dark", "DPO", f"{dpo:.5f}")
-    render_kpi(c, None, "", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
-    render_kpi(d, None, "", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
+    render_kpi(a, None, "Total Produk Cacat", format_angka(total_cacat))
+    render_kpi(b, None, "DPO", f"{dpo:.5f}")
+    render_kpi(c, None, "DPMO", f"{dpmo:,.2f}")
+    render_kpi(d, None, "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     dpmo_str = format_koma(dpmo, 3)
     peluang_bulat = format_angka(math.floor(dpmo))
     sigma_str = format_koma(sigma, 2) if np.isfinite(sigma) else "∞"
@@ -1117,7 +1096,7 @@ def halaman_fishbone():
         total_penyebab += len(baris)
 
     if st.session_state.fishbone_generated or total_penyebab > 0:
-        st.markdown("---")
+        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
         st.plotly_chart(fig_fb, use_container_width=True)
 
@@ -1223,7 +1202,7 @@ def halaman_fmea():
     hasil_akhir = hasil_akhir.sort_values("RPN (S × O)", ascending=False).reset_index(drop=True)
     hasil_akhir.insert(0, "Peringkat", np.arange(1, len(hasil_akhir) + 1))
 
-    st.markdown("---")
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)")
     st.dataframe(hasil_akhir, use_container_width=True, hide_index=True)
 
