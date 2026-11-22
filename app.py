@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)
+# Palet Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)[cite: 8]
 MERAH = "#5C0A0A"
 MERAH_HOVER = "#420606"
 KUNING = "#F5C518"
@@ -24,7 +24,7 @@ ABU_TEKS = "#5A606A"
 
 st.markdown(f"""
 <style>
-@import url('https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap');
+@import url('[https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap](https://fonts.googleapis.com/css2?family=Poppins:ital,wght@0,400;0,500;0,600;0,700;0,800;0,900;1,400&display=swap)');
 
 :root {{
     --primary-color: {MERAH} !important;
@@ -33,7 +33,6 @@ st.markdown(f"""
     --text-color: {HITAM} !important;
 }}
 
-/* Terapkan Poppins ke seluruh teks tanpa merusak Material Icon bawaan Streamlit */
 html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, button, table, th, td {{
     font-family: 'Poppins', sans-serif !important;
 }}
@@ -48,14 +47,12 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     color: {HITAM};
 }}
 
-/* Jarak atas lega agar header tidak terpotong */
 .block-container {{
     padding-top: 3.2rem !important;
     padding-bottom: 2rem !important;
     max-width: 1380px;
 }}
 
-/* Hilangkan seluruh aksen fokus bawaan Streamlit */
 *:focus, *:focus-visible {{
     outline-color: {MERAH} !important;
     box-shadow: none !important;
@@ -71,7 +68,6 @@ span[data-baseweb="tag"] {{
     color: {PUTIH} !important;
 }}
 
-/* Sidebar 1 Warna Merah Marun Pekat Solid & Terkunci */
 [data-testid="stSidebar"] {{
     background: {MERAH} !important;
     background-color: {MERAH} !important;
@@ -91,7 +87,6 @@ span[data-baseweb="tag"] {{
     padding-bottom: 0.6rem !important;
 }}
 
-/* Header Sidebar: Judul "Dashboard Kualitas Produksi PT XYZ", jarak lega ke garis putih, lalu jarak lega ke menu */
 [data-testid="stSidebarHeader"] {{
     background-color: {MERAH} !important;
     min-height: 112px !important;
@@ -113,7 +108,6 @@ span[data-baseweb="tag"] {{
     max-width: 190px;
 }}
 
-/* Tombol Buka-Tutup Sidebar */
 [data-testid="stSidebarCollapseButton"] button {{
     background-color: rgba(255, 255, 255, 0.16) !important;
     color: {PUTIH} !important;
@@ -152,7 +146,6 @@ span[data-baseweb="tag"] {{
     color: {PUTIH} !important;
 }}
 
-/* Menu Radio di Sidebar */
 [data-testid="stSidebar"] .stRadio > label {{
     display: none !important;
 }}
@@ -191,7 +184,6 @@ span[data-baseweb="tag"] {{
     display: none !important;
 }}
 
-/* Header Banner Seragam Berwarna Merah Marun Pekat & Tinggi Lebih Proporsional + Shadow Jelas */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
@@ -240,7 +232,6 @@ span[data-baseweb="tag"] {{
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }}
 
-/* Menyamakan Tinggi & Lebar Kolom */
 div[data-testid="stHorizontalBlock"] {{
     align-items: stretch !important;
 }}
@@ -258,7 +249,6 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     flex-direction: column !important;
 }}
 
-/* Kartu KPI Seragam Satu Warna & Shadow Jelas di Atas Background Abu-Abu */
 .kpi-box {{
     background: {PUTIH};
     border-radius: 14px;
@@ -318,7 +308,6 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     overflow-wrap: anywhere;
 }}
 
-/* Kartu Putih Umum & Kartu Beranda Lebih Tinggi agar Teks Tidak Keluar Garis + Shadow Jelas */
 .action-card {{
     background: {PUTIH};
     border-radius: 14px;
@@ -379,7 +368,6 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     margin-bottom: 4px;
 }}
 
-/* Tombol Download & Upload Seragam */
 div.stButton > button,
 div.stDownloadButton > button {{
     background-color: {MERAH} !important;
@@ -402,7 +390,6 @@ div.stDownloadButton > button:hover {{
     color: {PUTIH} !important;
 }}
 
-/* Kotak File Uploader Disamakan Persis Panjang, Lebar, & Warna dengan Tombol Download */
 [data-testid="stFileUploader"] {{
     width: 100% !important;
     margin: 0 !important;
@@ -453,7 +440,6 @@ div.stDownloadButton > button:hover {{
     opacity: 1 !important;
 }}
 
-/* Kotak Interpretasi Seragam Satu Warna di Semua Halaman */
 .interp-box {{
     background: {PUTIH};
     border-radius: 12px;
@@ -470,7 +456,6 @@ div.stDownloadButton > button:hover {{
     border-left: 6px solid {MERAH};
 }}
 
-/* Perbaikan Kontras Input Label & Text Area */
 label, .stTextArea label, .stTextInput label, .stSelectbox label, .stNumberInput label {{
     color: {HITAM} !important;
     font-weight: 600 !important;
@@ -609,14 +594,15 @@ def get_data_aktif():
     return dasar, aktif
 
 def hitung_peta_kendali(df_input):
-    """Menghitung batas kendali P-Chart dan Laney P' secara dinamis sesuai data aktif."""
+    """Menghitung batas kendali P-Chart dan Laney P' secara dinamis per tahap."""
     df = df_input.copy()
     if len(df) < 2:
         raise ValueError("Minimal diperlukan dua subgrup untuk menghitung moving range.")
-    if "Subgrup" not in df:
+    if "Subgrup" not in df.columns:
         df["Subgrup"] = np.arange(1, len(df) + 1)
 
-    df = df.reset_index(drop=True)
+    df = df.sort_values("Subgrup").reset_index(drop=True)
+
     total_cacat = float(df["Jumlah Produk Cacat"].sum())
     total_unit = float(df["Jumlah Unit Diperiksa"].sum())
     if total_unit <= 0:
@@ -624,18 +610,22 @@ def hitung_peta_kendali(df_input):
 
     df["p_i"] = df["Jumlah Produk Cacat"] / df["Jumlah Unit Diperiksa"]
     p_bar = total_cacat / total_unit
+
+    if not (0.0 < p_bar < 1.0):
+        raise ValueError("Rata-rata proporsi cacat (p_bar) harus berada di antara 0 dan 1.")
+
     df["sigma_pi"] = np.sqrt(p_bar * (1.0 - p_bar) / df["Jumlah Unit Diperiksa"])
     if (df["sigma_pi"] <= 0).any():
-        raise ValueError("Simpangan baku proporsi bernilai nol; periksa proporsi cacat.")
+        raise ValueError("Simpangan baku proporsi bernilai nol; periksa data input.")
+
     df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
 
-    # Moving Range berurutan pada data yang tersisa di tahap ini
     z_arr = df["z_i"].to_numpy(dtype=float)
     mr_vals = np.abs(np.diff(z_arr))
     df["R_i"] = np.concatenate([[np.nan], mr_vals])
     R_bar = float(np.mean(mr_vals)) if len(mr_vals) > 0 else 0.0
     sigma_z = R_bar / 1.128
-    overdispersi = sigma_z > 1.0
+    overdispersi = bool(sigma_z > 1.0)
 
     df["BKA_P"] = np.minimum(1.0, p_bar + 3.0 * df["sigma_pi"])
     df["BKB_P"] = np.maximum(0.0, p_bar - 3.0 * df["sigma_pi"])
@@ -653,8 +643,9 @@ def hitung_peta_kendali(df_input):
 
     df["CL"] = p_bar
     df["Status_OOC"] = (df["p_i"] > df["BKA_Aktif"]) | (df["p_i"] < df["BKB_Aktif"])
+
     ringkasan = {
-        "m": len(df),
+        "m": int(len(df)),
         "p_bar": p_bar,
         "R_bar": R_bar,
         "sigma_z": sigma_z,
@@ -803,7 +794,7 @@ def halaman_peta_kendali():
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    dasar = st.session_state.df_produksi.copy()
+    dasar = st.session_state.df_produksi.copy().reset_index(drop=True)
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
 
     if st.session_state.riwayat_iterasi:
@@ -816,7 +807,6 @@ def halaman_peta_kendali():
                 st.session_state.excluded_subgroups = []
                 st.rerun()
 
-    # Tahapan terbentuk dinamis sesuai jumlah iterasi/penyebab khusus yang dikeluarkan pada data yang diunggah
     semua_tahap = [[]]
     kumulatif = []
     for dikeluarkan_tahap in st.session_state.riwayat_iterasi:
