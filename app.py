@@ -649,7 +649,7 @@ def halaman_overdispersi():
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
     try:
-        hasil_df, res = hitung_peta_kendali(dasar)
+        _, res = hitung_peta_kendali(dasar)
     except Exception as e:
         st.error(str(e))
         return
@@ -665,14 +665,6 @@ def halaman_overdispersi():
         st.markdown(f'<div class="interp-box interp-yellow">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
     else:
         st.markdown(f'<div class="interp-box interp-blue">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
-
-    tabel = hasil_df[[
-        "Subgrup", "Tanggal", "Jumlah Unit Diperiksa",
-        "Jumlah Produk Cacat", "p_i", "sigma_pi", "z_i", "R_i"
-    ]].copy()
-    tabel["Tanggal"] = pd.to_datetime(tabel["Tanggal"]).dt.strftime("%Y-%m-%d")
-    st.markdown("### Tabel Perhitungan")
-    st.dataframe(tabel, use_container_width=True, hide_index=True)
 
 def halaman_peta_kendali():
     render_header(judul="Analisis Peta Kendali")
@@ -759,11 +751,6 @@ def halaman_peta_kendali():
             yaxis_title="Proporsi cacat"
         )
         st.plotly_chart(style_plotly_excel(fig), use_container_width=True)
-
-        with st.expander(f"Lihat Tabel Perhitungan Peta Kendali Tahap {tahap_ke}", expanded=is_tahap_terakhir):
-            tampil_ctrl = df_ctrl.copy()
-            tampil_ctrl["Tanggal"] = pd.to_datetime(tampil_ctrl["Tanggal"]).dt.strftime("%Y-%m-%d")
-            st.dataframe(tampil_ctrl, use_container_width=True, hide_index=True)
 
         if is_tahap_terakhir:
             if ooc.empty:
