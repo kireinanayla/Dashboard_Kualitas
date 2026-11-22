@@ -13,7 +13,7 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 4 Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)
+# Palet Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)
 MERAH = "#5C0A0A"
 MERAH_HOVER = "#420606"
 KUNING = "#F5C518"
@@ -453,7 +453,7 @@ div.stDownloadButton > button:hover {{
     opacity: 1 !important;
 }}
 
-/* Kotak Interpretasi dengan Shadow Jelas (Tanpa Warna Biru) */
+/* Kotak Interpretasi Seragam Satu Warna di Semua Halaman */
 .interp-box {{
     background: {PUTIH};
     border-radius: 12px;
@@ -463,11 +463,12 @@ div.stDownloadButton > button:hover {{
     line-height: 1.65;
     box-shadow: 0 8px 22px rgba(26, 28, 32, 0.11);
     border: 1px solid #E2E5EA;
+    border-left: 6px solid {MERAH};
     margin-bottom: 14px;
 }}
-.interp-red {{ border-left: 6px solid {MERAH}; }}
-.interp-dark {{ border-left: 6px solid {HITAM}; }}
-.interp-yellow {{ border-left: 6px solid {KUNING}; }}
+.interp-red, .interp-dark, .interp-yellow {{
+    border-left: 6px solid {MERAH};
+}}
 
 /* Perbaikan Kontras Input Label & Text Area */
 label, .stTextArea label, .stTextInput label, .stSelectbox label, .stNumberInput label {{
@@ -997,12 +998,17 @@ def halaman_level_sigma():
         )
 
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Tabel Konversi Level Sigma (Six Sigma)")
+    st.markdown("### Tabel Level Sigma")
     tabel_sigma = pd.DataFrame({
-        "Level Sigma": ["1 Sigma", "2 Sigma", "3 Sigma", "4 Sigma", "5 Sigma", "6 Sigma"],
-        "DPMO (Defects Per Million Opportunities)": ["691.462", "308.538", "66.807", "6.210", "233", "3,4"],
-        "COPQ (Cost of Poor Quality)": ["Tidak kompetitif", "> 40% dari penjualan", "25% – 40% dari penjualan", "15% – 25% dari penjualan", "5% – 15% dari penjualan", "< 1% dari penjualan"],
-        "Persentase Produk Baik (Yield)": ["30,85%", "69,15%", "93,32%", "99,379%", "99,977%", "99,99966%"]
+        "Level Sigma": ["2 sigma", "3 sigma", "4 sigma", "5 sigma", "6 sigma"],
+        "DPMO": ["508,538", "66,807", "6,210", "233", "3,4"],
+        "Keterangan": [
+            "Rata-rata industri Indonesia",
+            "Rata-rata industri Indonesia",
+            "Rata-rata industri USA",
+            "Rata-rata industri USA",
+            "Industri kelas dunia"
+        ]
     })
     st.dataframe(tabel_sigma, use_container_width=True, hide_index=True)
 
