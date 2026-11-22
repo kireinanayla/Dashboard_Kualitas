@@ -15,8 +15,8 @@ st.set_page_config(
 
 # Palet Warna 5 Warna Solid (Merah Marun Tua, Kuning Emas, Putih, Biru, Hitam)
 MERAH = "#7F1D1D"
-MERAH_HOVER = "#631515"
-KUNING = "#F5C518"
+MERAH = "#5C0A0A"
+MERAH_HOVER = "#420606"
 BIRU = "#2563EB"
 HITAM = "#1A1C20"
 PUTIH = "#FFFFFF"
