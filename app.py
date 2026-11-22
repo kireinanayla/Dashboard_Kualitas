@@ -1,4 +1,5 @@
 import io
+import math
 import numpy as np
 import pandas as pd
 import streamlit as st
@@ -12,8 +13,9 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 5 Warna Solid
-MERAH = "#D71920"
+# Palet Warna 5 Warna Solid (Merah Pekat tanpa kesan pink, Kuning, Putih, Biru, Hitam)
+MERAH = "#B91C1C"
+MERAH_HOVER = "#991B1B"
 KUNING = "#F5C518"
 HITAM = "#1A1C20"
 PUTIH = "#FFFFFF"
@@ -46,9 +48,11 @@ html, body, .stApp, p, div, h1, h2, h3, h4, label, input, textarea, select, butt
     background-color: {ABU_BG};
     color: {HITAM};
 }}
+
+/* Beri jarak lega di atas header putih agar tidak terpotong bilah atas */
 .block-container {{
-    padding-top: 1rem;
-    padding-bottom: 2rem;
+    padding-top: 3.2rem !important;
+    padding-bottom: 2rem !important;
     max-width: 1380px;
 }}
 
@@ -68,10 +72,11 @@ span[data-baseweb="tag"] {{
     color: {PUTIH} !important;
 }}
 
-/* Sidebar Terkunci & Header Putih PT XYZ sejajar tombol << */
+/* Sidebar 1 Warna Hitam Solid Penuh & Terkunci */
 [data-testid="stSidebar"] {{
-    background: linear-gradient(180deg, {PUTIH} 0px, {PUTIH} 62px, {HITAM} 62px, {HITAM} 100%) !important;
-    border-right: 1px solid #E5E7EB;
+    background: {HITAM} !important;
+    background-color: {HITAM} !important;
+    border-right: none !important;
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
@@ -79,6 +84,7 @@ span[data-baseweb="tag"] {{
 [data-testid="stSidebar"] > div:first-child,
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {{
+    background-color: {HITAM} !important;
     height: 100vh !important;
     max-height: 100vh !important;
     overflow: hidden !important;
@@ -86,42 +92,53 @@ span[data-baseweb="tag"] {{
     padding-bottom: 0.6rem !important;
 }}
 
-/* Area Header Putih di atas Sidebar: tampilkan PT XYZ di kiri, tombol << di kanan */
+/* Header Sidebar: Judul "Dashboard Kualitas Produksi PT XYZ" di kiri & tombol << di kanan, berjarak lega ke menu */
 [data-testid="stSidebarHeader"] {{
-    background-color: {PUTIH} !important;
-    height: 62px !important;
-    min-height: 62px !important;
-    padding: 0 14px 0 18px !important;
+    background-color: {HITAM} !important;
+    min-height: 76px !important;
+    padding: 18px 14px 16px 18px !important;
     display: flex !important;
-    align-items: center !important;
+    align-items: flex-start !important;
     justify-content: space-between !important;
-    margin-bottom: 10px !important;
+    gap: 10px !important;
+    margin-bottom: 18px !important;
+    border-bottom: 1px solid rgba(255, 255, 255, 0.12) !important;
 }}
 [data-testid="stSidebarHeader"]::before {{
-    content: "PT XYZ";
+    content: "Dashboard Kualitas Produksi PT XYZ";
     font-family: 'Poppins', sans-serif !important;
-    font-size: 19px;
-    font-weight: 800;
-    color: {HITAM};
-    letter-spacing: 0.4px;
-    line-height: 1;
+    font-size: 14.5px;
+    font-weight: 700;
+    color: {PUTIH};
+    line-height: 1.35;
+    max-width: 185px;
 }}
 
-/* Tombol Buka-Tutup Sidebar agar Bersih & Kontras */
-[data-testid="stSidebarCollapseButton"] button,
-[data-testid="collapsedControl"] button {{
-    background-color: {HITAM} !important;
+/* Tombol Buka-Tutup Sidebar menyatu rapi */
+[data-testid="stSidebarCollapseButton"] button {{
+    background-color: rgba(255, 255, 255, 0.12) !important;
     color: {PUTIH} !important;
     border: none !important;
     border-radius: 8px !important;
     width: 32px !important;
     height: 32px !important;
-    box-shadow: 0 2px 6px rgba(0, 0, 0, 0.16) !important;
+    flex-shrink: 0 !important;
 }}
-[data-testid="stSidebarCollapseButton"] button:hover,
-[data-testid="collapsedControl"] button:hover {{
+[data-testid="stSidebarCollapseButton"] button:hover {{
     background-color: {MERAH} !important;
     color: {PUTIH} !important;
+}}
+[data-testid="collapsedControl"] button {{
+    background-color: {HITAM} !important;
+    color: {PUTIH} !important;
+    border: none !important;
+    border-radius: 8px !important;
+    width: 34px !important;
+    height: 34px !important;
+    box-shadow: 0 2px 8px rgba(0, 0, 0, 0.18) !important;
+}}
+[data-testid="collapsedControl"] button:hover {{
+    background-color: {MERAH} !important;
 }}
 [data-testid="stSidebarCollapseButton"] svg,
 [data-testid="collapsedControl"] svg,
@@ -136,13 +153,13 @@ span[data-baseweb="tag"] {{
     display: none !important;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] {{
-    gap: 4px !important;
+    gap: 5px !important;
     padding: 4px 10px 0 10px;
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label {{
     background-color: transparent;
     border-radius: 9px;
-    padding: 8px 14px !important;
+    padding: 8.5px 14px !important;
     transition: all 0.2s ease;
     border: 1px solid transparent;
     width: 100%;
@@ -158,7 +175,7 @@ span[data-baseweb="tag"] {{
 [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"],
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) {{
     background-color: {MERAH} !important;
-    box-shadow: 0 4px 12px rgba(215, 25, 32, 0.35);
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.28);
 }}
 [data-testid="stSidebar"] div[role="radiogroup"] label[data-checked="true"] p,
 [data-testid="stSidebar"] div[role="radiogroup"] label:has(input:checked) p {{
@@ -170,13 +187,13 @@ span[data-baseweb="tag"] {{
     display: none !important;
 }}
 
-/* Header Banner Tiap Halaman: Ramping, Font Proporsional, & Shadow Jelas */
+/* Header Banner Tiap Halaman: Utuh, Ramping, Font Proporsional, & Shadow Jelas */
 .dashboard-header {{
     display: flex;
     justify-content: space-between;
     align-items: center;
     background: {PUTIH};
-    padding: 13px 22px;
+    padding: 15px 22px;
     border-radius: 14px;
     box-shadow: 0 6px 20px rgba(26, 28, 32, 0.10);
     border: 1px solid #E5E7EB;
@@ -186,7 +203,7 @@ span[data-baseweb="tag"] {{
 .header-text-wrap {{
     display: flex;
     flex-direction: column;
-    gap: 3px;
+    gap: 4px;
 }}
 .header-title {{
     font-size: 18.5px !important;
@@ -200,7 +217,7 @@ span[data-baseweb="tag"] {{
     font-weight: 400 !important;
     color: {ABU_TEKS} !important;
     margin: 0 !important;
-    line-height: 1.4 !important;
+    line-height: 1.45 !important;
 }}
 .period-badge {{
     display: inline-flex;
@@ -318,7 +335,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     overflow-wrap: anywhere;
 }}
 
-/* Kartu Putih Umum & Kartu Beranda Seragam */
+/* Kartu Putih Umum & Kartu Beranda Dikunci Sama Ukuran */
 .action-card {{
     background: {PUTIH};
     border-radius: 14px;
@@ -326,13 +343,17 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     box-shadow: 0 4px 14px rgba(26, 28, 32, 0.06);
     border: 1px solid #E5E7EB;
     margin-bottom: 12px;
-    flex: 1 1 auto;
+    width: 100%;
+    box-sizing: border-box;
 }}
 .home-card {{
-    min-height: 126px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
+    height: 150px !important;
+    min-height: 150px !important;
+    max-height: 150px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    margin-bottom: 12px !important;
 }}
 .action-header {{
     display: flex;
@@ -372,7 +393,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     margin-bottom: 4px;
 }}
 
-/* Menyamakan Ukuran & Tampilan Tombol Download & Upload di Beranda */
+/* Menyamakan Ukuran & Warna Merah Pekat Tombol Download & Upload di Beranda */
 div.stButton > button,
 div.stDownloadButton > button {{
     background-color: {MERAH} !important;
@@ -381,21 +402,24 @@ div.stDownloadButton > button {{
     border-radius: 10px !important;
     height: 46px !important;
     min-height: 46px !important;
+    max-height: 46px !important;
     padding: 0 1.2rem !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
-    box-shadow: 0 4px 10px rgba(215, 25, 32, 0.24) !important;
+    box-shadow: 0 4px 10px rgba(26, 28, 32, 0.14) !important;
     width: 100% !important;
+    margin: 0 !important;
 }}
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {{
-    background-color: #B01218 !important;
+    background-color: {MERAH_HOVER} !important;
     color: {PUTIH} !important;
 }}
 
-/* Kotak File Uploader Disamakan Persis dengan Tombol Merah Download Template */
+/* Kotak File Uploader Disamakan Persis Panjang, Lebar, & Warnanya dengan Tombol Download */
 [data-testid="stFileUploader"] {{
     width: 100% !important;
+    margin: 0 !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
     background-color: {MERAH} !important;
@@ -408,11 +432,13 @@ div.stDownloadButton > button:hover {{
     display: flex !important;
     align-items: center !important;
     justify-content: center !important;
-    box-shadow: 0 4px 10px rgba(215, 25, 32, 0.24) !important;
+    box-shadow: 0 4px 10px rgba(26, 28, 32, 0.14) !important;
     cursor: pointer !important;
+    width: 100% !important;
+    box-sizing: border-box !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"]:hover {{
-    background-color: #B01218 !important;
+    background-color: {MERAH_HOVER} !important;
 }}
 [data-testid="stFileUploaderDropzoneInstructions"] {{
     display: none !important;
@@ -445,11 +471,11 @@ div.stDownloadButton > button:hover {{
 .interp-box {{
     background: {PUTIH};
     border-radius: 12px;
-    padding: 14px 18px;
+    padding: 15px 18px;
     color: {HITAM};
     font-size: 13.5px;
-    line-height: 1.6;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.03);
+    line-height: 1.65;
+    box-shadow: 0 3px 10px rgba(26, 28, 32, 0.05);
     border: 1px solid #E5E7EB;
     margin-bottom: 12px;
 }}
@@ -531,6 +557,9 @@ def render_kpi(kolom, simbol, warna_ikon, aksen_bawah, label, nilai):
 
 def format_angka(x):
     return f"{x:,.0f}".replace(",", ".")
+
+def format_koma(x, desimal=3):
+    return f"{x:,.{desimal}f}".replace(",", "X").replace(".", ",").replace("X", ".")
 
 def style_plotly(fig):
     fig.update_layout(
@@ -888,7 +917,7 @@ def halaman_runs_test():
         st.error(str(e))
         return
 
-    alpha = st.number_input("Taraf signifikansi (α)", min_value=0.01, max_value=0.10, value=0.05, step=0.01)
+    alpha = 0.05
     a, b, c, d = st.columns(4)
     render_kpi(a, "M", "icon-dark", "accent-dark", "Median Proporsi", f"{rt['median']:.5f}")
     render_kpi(b, "V", "icon-dark", "accent-yellow", "Jumlah Runs (V)", str(rt["V"]))
@@ -897,9 +926,9 @@ def halaman_runs_test():
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
-        st.markdown('<div class="interp-box interp-red"><b>Keputusan: Tolak H₀.</b> Data tidak menyebar secara acak.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-red"><b>Keputusan: Tolak H₀.</b> Data tidak menyebar secara acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="interp-box interp-blue"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-blue"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU)))
@@ -926,11 +955,24 @@ def halaman_kapabilitas():
     render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
 
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.latex(r"P\%_{pk} = \frac{Z(\bar{p})}{3}")
+    ppk_str = format_koma(ppk, 3)
+    z_str = format_koma(z_p, 3)
     if ppk >= 1:
-        st.markdown('<div class="interp-box interp-blue"><b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="interp-box interp-blue">'
+            f'<b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b><br>'
+            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} menunjukkan bahwa proses sudah kapabel, sehingga kinerja proses perlu terus dipertahankan.'
+            f'</div>',
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown('<div class="interp-box interp-red"><b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b></div>', unsafe_allow_html=True)
+        st.markdown(
+            f'<div class="interp-box interp-red">'
+            f'<b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b><br>'
+            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} menunjukkan bahwa proses belum kapabel, sehingga diperlukan perbaikan untuk menurunkan proporsi cacat dan meningkatkan kapabilitas proses.'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
 def halaman_level_sigma():
     render_header(judul="Level Sigma")
@@ -954,10 +996,29 @@ def halaman_level_sigma():
     render_kpi(c, None, "", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
     render_kpi(d, None, "", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
-    st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
-    st.latex(r"DPMO = DPO \times 10^6")
-    st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    dpmo_str = format_koma(dpmo, 3)
+    peluang_bulat = format_angka(math.floor(dpmo))
+    sigma_str = format_koma(sigma, 2) if np.isfinite(sigma) else "∞"
+
+    if np.isfinite(sigma) and sigma >= 6:
+        st.markdown(
+            f'<div class="interp-box interp-blue">'
+            f'Hasil perhitungan menunjukkan nilai DPMO sebesar {dpmo_str} dengan level sigma {sigma_str}. '
+            f'Artinya, dari satu juta peluang terdapat sekitar {peluang_bulat} peluang terjadinya cacat. '
+            f'Nilai ini menunjukkan bahwa proses produksi telah memenuhi target Six Sigma (6σ), sehingga kinerja proses perlu terus dipertahankan.'
+            f'</div>',
+            unsafe_allow_html=True
+        )
+    else:
+        st.markdown(
+            f'<div class="interp-box interp-red">'
+            f'Hasil perhitungan menunjukkan nilai DPMO sebesar {dpmo_str} dengan level sigma {sigma_str}. '
+            f'Artinya, dari satu juta peluang terdapat sekitar {peluang_bulat} peluang terjadinya cacat. '
+            f'Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ), sehingga perlu dilakukan perbaikan untuk menurunkan jumlah cacat dan meningkatkan level sigma.'
+            f'</div>',
+            unsafe_allow_html=True
+        )
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
