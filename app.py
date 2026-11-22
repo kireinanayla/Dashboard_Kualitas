@@ -704,6 +704,69 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
         sigma = float(norm.ppf(1 - dpmo / 1_000_000) + shift)
     return dpo, dpmo, sigma
 
+def jalankan_tahapan_peta_kendali(df_awal, max_iter=100, mode_eliminasi="semua_ooc"):
+    """
+    Menjalankan peta kendali (P / Laney P') secara bertahap dan dinamis
+    tanpa batas tetap 3 tahap—berhenti otomatis saat jumlah_ooc == 0
+    atau sisa subgrup < 2.
+
+    mode_eliminasi:
+      - "semua_ooc": membuang seluruh subgrup yang keluar batas di tahap berjalan.
+      - "satu_terburuk": membuang 1 subgrup dengan penyimpangan terbesar per tahap.
+    """
+    riwayat_tahap = []
+    df_aktif = df_awal.copy()
+    tahap_ke = 1
+
+    while tahap_ke <= max_iter:
+        if len(df_aktif) < 2:
+            break
+
+        df_hasil, ringkasan = hitung_peta_kendali(df_aktif)
+        ooc_rows = df_hasil[df_hasil["Status_OOC"]]
+        ooc_subgroups = ooc_rows["Subgrup"].tolist()
+        terkendali = (ringkasan["jumlah_ooc"] == 0)
+
+        if terkendali:
+            narasi = (
+                f"Tahap {tahap_ke}: Proses sudah terkendali statistik. "
+                f"Seluruh subgrup ({ringkasan['m']} subgrup) berada dalam batas kendali."
+            )
+        else:
+            daftar_sg = ", ".join(str(s) for s in ooc_subgroups)
+            narasi = (
+                f"Tahap {tahap_ke}: Proses belum terkendali statistik karena masih terdapat "
+                f"{ringkasan['jumlah_ooc']} subgrup yang keluar dari batas kendali "
+                f"(Subgrup ke-{daftar_sg}) dari total {ringkasan['m']} subgrup."
+            )
+
+        riwayat_tahap.append({
+            "tahap": tahap_ke,
+            "df": df_hasil,
+            "ringkasan": ringkasan,
+            "ooc_subgroups": ooc_subgroups,
+            "terkendali": terkendali,
+            "narasi": narasi
+        })
+
+        if terkendali:
+            break
+
+        if mode_eliminasi == "satu_terburuk":
+            df_hasil_temp = df_hasil.copy()
+            df_hasil_temp["_deviasi"] = np.maximum(
+                np.maximum(0.0, df_hasil_temp["p_i"] - df_hasil_temp["BKA_Aktif"]),
+                np.maximum(0.0, df_hasil_temp["BKB_Aktif"] - df_hasil_temp["p_i"])
+            )
+            idx_buang = df_hasil_temp["_deviasi"].idxmax()
+            df_aktif = df_hasil_temp.drop(index=idx_buang).drop(columns=["_deviasi"]).reset_index(drop=True)
+        else:
+            df_aktif = df_hasil[~df_hasil["Status_OOC"]].reset_index(drop=True)
+
+        tahap_ke += 1
+
+    return riwayat_tahap
+
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
