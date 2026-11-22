@@ -13,11 +13,10 @@ st.set_page_config(
     initial_sidebar_state="expanded"
 )
 
-# Palet Warna 5 Warna Solid (Merah Marun Pekat/Bold, Kuning Emas, Putih, Biru, Hitam)
+# Palet Warna 4 Warna Solid (Merah Marun Pekat, Kuning Emas, Putih, Hitam — Tanpa Warna Biru)
 MERAH = "#5C0A0A"
 MERAH_HOVER = "#420606"
 KUNING = "#F5C518"
-BIRU = "#2563EB"
 HITAM = "#1A1C20"
 PUTIH = "#FFFFFF"
 ABU_BG = "#F4F5F7"
@@ -454,7 +453,7 @@ div.stDownloadButton > button:hover {{
     opacity: 1 !important;
 }}
 
-/* Kotak Interpretasi dengan Shadow Jelas */
+/* Kotak Interpretasi dengan Shadow Jelas (Tanpa Warna Biru) */
 .interp-box {{
     background: {PUTIH};
     border-radius: 12px;
@@ -467,7 +466,7 @@ div.stDownloadButton > button:hover {{
     margin-bottom: 14px;
 }}
 .interp-red {{ border-left: 6px solid {MERAH}; }}
-.interp-blue {{ border-left: 6px solid {BIRU}; }}
+.interp-dark {{ border-left: 6px solid {HITAM}; }}
 .interp-yellow {{ border-left: 6px solid {KUNING}; }}
 
 /* Perbaikan Kontras Input Label & Text Area */
@@ -788,7 +787,7 @@ def halaman_overdispersi():
     if res["is_overdispersed"]:
         st.markdown(f'<div class="interp-box interp-yellow">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &gt; 1</b>, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
     else:
-        st.markdown(f'<div class="interp-box interp-blue">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
+        st.markdown(f'<div class="interp-box interp-dark">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
 
 def halaman_peta_kendali():
     render_header(judul="Analisis Peta Kendali")
@@ -802,7 +801,7 @@ def halaman_peta_kendali():
     if st.session_state.riwayat_iterasi:
         col_info, col_reset = st.columns([4, 1])
         with col_info:
-            st.markdown(f'<div class="interp-box interp-blue">Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.</div>', unsafe_allow_html=True)
+            st.markdown(f'<div class="interp-box interp-dark">Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.</div>', unsafe_allow_html=True)
         with col_reset:
             if st.button("Reset ke Tahap 1", use_container_width=True):
                 st.session_state.riwayat_iterasi = []
@@ -841,9 +840,9 @@ def halaman_peta_kendali():
 
         fig = go.Figure()
         fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"], mode="lines", name="BKA", line=dict(color=MERAH, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=BIRU, width=2)))
+        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=HITAM, width=2)))
         fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"], mode="lines", name="BKB", line=dict(color=KUNING, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat (pi)", line=dict(color=HITAM), marker=dict(size=7)))
+        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat (pi)", line=dict(color=MERAH, width=2), marker=dict(size=7, color=HITAM)))
 
         ooc = df_ctrl[df_ctrl["Status_OOC"]]
         if not ooc.empty:
@@ -854,7 +853,7 @@ def halaman_peta_kendali():
 
         if is_tahap_terakhir:
             if ooc.empty:
-                st.markdown(f'<div class="interp-box interp-blue"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
+                st.markdown(f'<div class="interp-box interp-yellow"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
             else:
                 st.markdown(f'<div class="interp-box interp-red">Masih ditemukan <b>{res["jumlah_ooc"]} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{", ".join(ooc["Subgrup"].astype(str).tolist())}</b>.</div>', unsafe_allow_html=True)
 
@@ -905,10 +904,10 @@ def halaman_runs_test():
     if rt["p_value"] < alpha:
         st.markdown('<div class="interp-box interp-red"><b>Keputusan: Tolak H₀.</b> Data tidak menyebar secara acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
     else:
-        st.markdown('<div class="interp-box interp-blue"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-yellow"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
 
     fig = go.Figure()
-    fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU)))
+    fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=HITAM)))
     fig.add_hline(y=rt["median"], line_dash="dash", line_color=KUNING, annotation_text=f"Median = {rt['median']:.5f}")
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
@@ -936,7 +935,7 @@ def halaman_kapabilitas():
     z_str = format_koma(z_p, 3)
     if ppk >= 1:
         st.markdown(
-            f'<div class="interp-box interp-blue">'
+            f'<div class="interp-box interp-yellow">'
             f'<b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b><br>'
             f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} menunjukkan bahwa proses sudah kapabel, sehingga kinerja proses perlu terus dipertahankan.'
             f'</div>',
@@ -980,7 +979,7 @@ def halaman_level_sigma():
 
     if np.isfinite(sigma) and sigma >= 6:
         st.markdown(
-            f'<div class="interp-box interp-blue">'
+            f'<div class="interp-box interp-yellow">'
             f'Hasil perhitungan menunjukkan nilai DPMO sebesar {dpmo_str} dengan level sigma {sigma_str}. '
             f'Artinya, dari satu juta peluang terdapat sekitar {peluang_bulat} peluang terjadinya cacat. '
             f'Nilai ini menunjukkan bahwa proses produksi telah memenuhi target Six Sigma (6σ), sehingga kinerja proses perlu terus dipertahankan.'
@@ -996,6 +995,16 @@ def halaman_level_sigma():
             f'</div>',
             unsafe_allow_html=True
         )
+
+    st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
+    st.markdown("### Tabel Konversi Level Sigma (Six Sigma)")
+    tabel_sigma = pd.DataFrame({
+        "Level Sigma": ["1 Sigma", "2 Sigma", "3 Sigma", "4 Sigma", "5 Sigma", "6 Sigma"],
+        "DPMO (Defects Per Million Opportunities)": ["691.462", "308.538", "66.807", "6.210", "233", "3,4"],
+        "COPQ (Cost of Poor Quality)": ["Tidak kompetitif", "> 40% dari penjualan", "25% – 40% dari penjualan", "15% – 25% dari penjualan", "5% – 15% dari penjualan", "< 1% dari penjualan"],
+        "Persentase Produk Baik (Yield)": ["30,85%", "69,15%", "93,32%", "99,379%", "99,977%", "99,99966%"]
+    })
+    st.dataframe(tabel_sigma, use_container_width=True, hide_index=True)
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -1028,7 +1037,7 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
         y_box = y_top + 0.45 if is_atas else y_top - 0.45
         fig.add_annotation(
             x=x_top, y=y_box, text=f"<b>{kat}</b>",
-            showarrow=False, bgcolor=KUNING if is_atas else BIRU,
+            showarrow=False, bgcolor=KUNING if is_atas else HITAM,
             bordercolor=HITAM, borderwidth=1.5, borderpad=6,
             font=dict(family="Poppins, sans-serif", color=HITAM if is_atas else PUTIH, size=11.5)
         )
@@ -1086,7 +1095,7 @@ def halaman_fishbone():
     if st.button("Buat Gambar Diagram Fishbone & Simpan", use_container_width=True):
         st.session_state.fishbone_inputs = input_baru
         st.session_state.fishbone_generated = True
-        st.markdown('<div class="interp-box interp-blue">Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.</div>', unsafe_allow_html=True)
+        st.markdown('<div class="interp-box interp-yellow">Data penyebab berhasil disimpan. Diagram Fishbone telah dibuat di bawah dan otomatis diteruskan ke menu FMEA.</div>', unsafe_allow_html=True)
 
     data_parsed = {}
     total_penyebab = 0
