@@ -74,37 +74,40 @@ span[data-baseweb="tag"] {{
     background: {MERAH} !important;
     background-color: {MERAH} !important;
     border-right: none !important;
-    min-height: 100vh !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
 }}
 [data-testid="stSidebar"] > div:first-child,
 [data-testid="stSidebarContent"],
 [data-testid="stSidebarUserContent"] {{
     background-color: {MERAH} !important;
-    min-height: 100vh !important;
-    overflow-y: auto !important;
+    height: 100vh !important;
+    max-height: 100vh !important;
+    overflow: hidden !important;
     padding-top: 0 !important;
-    padding-bottom: 0.8rem !important;
+    padding-bottom: 0.6rem !important;
 }}
 
 [data-testid="stSidebarHeader"] {{
     background-color: {MERAH} !important;
-    min-height: 104px !important;
-    padding: 20px 14px 24px 18px !important;
+    min-height: 112px !important;
+    padding: 22px 14px 30px 18px !important;
     display: flex !important;
     align-items: flex-start !important;
     justify-content: space-between !important;
     gap: 10px !important;
-    margin-bottom: 18px !important;
+    margin-bottom: 24px !important;
     border-bottom: 1.5px solid rgba(255, 255, 255, 0.32) !important;
 }}
 [data-testid="stSidebarHeader"]::before {{
     content: "Dashboard Kualitas Produksi PT XYZ";
     font-family: 'Poppins', sans-serif !important;
-    font-size: 16px;
+    font-size: 16.5px;
     font-weight: 700;
     color: {PUTIH};
     line-height: 1.4;
-    max-width: 195px;
+    max-width: 190px;
 }}
 
 [data-testid="stSidebarCollapseButton"] button {{
@@ -231,6 +234,23 @@ span[data-baseweb="tag"] {{
     box-shadow: 0 3px 8px rgba(0, 0, 0, 0.12);
 }}
 
+div[data-testid="stHorizontalBlock"] {{
+    align-items: stretch !important;
+}}
+div[data-testid="column"],
+div[data-testid="stColumn"] {{
+    display: flex !important;
+    flex-direction: column !important;
+}}
+div[data-testid="column"] > div,
+div[data-testid="stColumn"] > div,
+div[data-testid="column"] [data-testid="stVerticalBlock"],
+div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
+    flex: 1 1 auto !important;
+    display: flex !important;
+    flex-direction: column !important;
+}}
+
 .kpi-box {{
     background: {PUTIH};
     border-radius: 14px;
@@ -243,6 +263,8 @@ span[data-baseweb="tag"] {{
     position: relative;
     overflow: hidden;
     height: 112px;
+    min-height: 112px;
+    max-height: 112px;
     width: 100%;
     box-sizing: border-box;
 }}
@@ -261,7 +283,7 @@ span[data-baseweb="tag"] {{
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 16px;
+    font-size: 17px;
     font-weight: 700;
     color: {PUTIH};
     flex-shrink: 0;
@@ -276,12 +298,15 @@ span[data-baseweb="tag"] {{
     color: {ABU_TEKS};
     margin-bottom: 4px;
     line-height: 1.3;
+    white-space: normal;
+    word-wrap: break-word;
 }}
 .kpi-number {{
     font-size: clamp(18px, 1.35vw, 22px);
     font-weight: 800;
     color: {HITAM};
     line-height: 1.2;
+    white-space: normal;
     overflow-wrap: anywhere;
 }}
 
@@ -296,13 +321,15 @@ span[data-baseweb="tag"] {{
     box-sizing: border-box;
 }}
 .home-card {{
-    height: 192px;
-    padding: 24px 26px;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: flex-start;
-    margin-bottom: 14px;
+    height: 192px !important;
+    min-height: 192px !important;
+    max-height: 192px !important;
+    padding: 24px 26px !important;
+    display: flex !important;
+    flex-direction: column !important;
+    justify-content: center !important;
+    align-items: flex-start !important;
+    margin-bottom: 14px !important;
 }}
 .action-header {{
     display: flex;
@@ -350,11 +377,14 @@ div.stDownloadButton > button {{
     border: none !important;
     border-radius: 10px !important;
     height: 46px !important;
+    min-height: 46px !important;
+    max-height: 46px !important;
     padding: 0 1.2rem !important;
     font-size: 13.5px !important;
     font-weight: 600 !important;
     box-shadow: 0 6px 16px rgba(26, 28, 32, 0.18) !important;
     width: 100% !important;
+    margin: 0 !important;
 }}
 div.stButton > button:hover,
 div.stDownloadButton > button:hover {{
@@ -364,6 +394,7 @@ div.stDownloadButton > button:hover {{
 
 [data-testid="stFileUploader"] {{
     width: 100% !important;
+    margin: 0 !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] {{
     background-color: {MERAH} !important;
@@ -371,6 +402,7 @@ div.stDownloadButton > button:hover {{
     border-radius: 10px !important;
     height: 46px !important;
     min-height: 46px !important;
+    max-height: 46px !important;
     padding: 0 16px !important;
     display: flex !important;
     align-items: center !important;
@@ -397,6 +429,10 @@ div.stDownloadButton > button:hover {{
     box-shadow: none !important;
     width: 100% !important;
     height: 100% !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: center !important;
+    gap: 8px !important;
 }}
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] button *,
 [data-testid="stFileUploader"] section[data-testid="stFileUploaderDropzone"] span,
