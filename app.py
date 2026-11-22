@@ -300,14 +300,14 @@ h1, h2, h3 {{ color: {HITAM}; }}
 [data-testid="stSidebar"] button,
 [data-testid="stSidebar"] button svg,
 [data-testid="collapsedControl"] button,
-[data-testid="collapsedControl"] svg {
+[data-testid="collapsedControl"] svg {{
     color: #FFFFFF !important;
     fill: #FFFFFF !important;
-}
+}}
 [data-testid="stSidebar"] button:hover,
-[data-testid="collapsedControl"] button:hover {
+[data-testid="collapsedControl"] button:hover {{
     background-color: #D71920 !important;
-}
+}}
 \n</style>
 """, unsafe_allow_html=True)
 
@@ -1065,14 +1065,14 @@ def halaman_fmea():
 
 
 MENU_ITEMS = {
-    "🏠  Beranda (Input Data)": halaman_beranda,
-    "📊  Identifikasi Overdispersi": halaman_overdispersi,
-    "📈  Peta Kendali": halaman_peta_kendali,
-    "🔀  Uji Keacakan (Runs Test)": halaman_runs_test,
-    "⏱️  Indeks Kapabilitas Proses": halaman_kapabilitas,
-    "Σ   Level Sigma": halaman_level_sigma,
-    "🐟  Diagram Sebab-Akibat": halaman_fishbone,
-    "📋  FMEA": halaman_fmea
+    "Beranda (Input Data)": halaman_beranda,
+    "Identifikasi Overdispersi": halaman_overdispersi,
+    "Peta Kendali": halaman_peta_kendali,
+    "Uji Keacakan (Runs Test)": halaman_runs_test,
+    "Indeks Kapabilitas Proses": halaman_kapabilitas,
+    "Level Sigma": halaman_level_sigma,
+    "Diagram Sebab-Akibat": halaman_fishbone,
+    "FMEA": halaman_fmea
 }
 
 with st.sidebar:
