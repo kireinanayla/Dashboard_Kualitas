@@ -596,112 +596,6 @@ def get_data_aktif():
     aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
     return dasar, aktif
 
-def hitung_peta_kendali(df_input):
-    """Menghitung P-Chart atau Laney P' berdasarkan data yang digunakan."""
-
-    df = df_input.copy()
-
-    if len(df) < 2:
-        raise ValueError("Minimal diperlukan dua subgrup untuk menghitung moving range.")
-
-    if "Subgrup" not in df.columns:
-        df["Subgrup"] = np.arange(1, len(df) + 1)
-
-    if (df["Jumlah Unit Diperiksa"] <= 0).any():
-        raise ValueError("Jumlah unit diperiksa harus lebih besar dari 0.")
-
-    df = df.sort_values("Subgrup").reset_index(drop=True)
-
-    # 1. Menghitung proporsi cacat setiap subgrup
-    df["p_i"] = (
-        df["Jumlah Produk Cacat"] /
-        df["Jumlah Unit Diperiksa"]
-    )
-
-    # 2. Menghitung rata-rata proporsi cacat
-    p_bar = float(df["p_i"].mean())
-
-    if not (0 < p_bar < 1):
-        raise ValueError("Rata-rata proporsi cacat harus berada di antara 0 dan 1.")
-
-    # 3. Menghitung simpangan baku proporsi
-    df["sigma_pi"] = np.sqrt(
-        p_bar * (1 - p_bar) /
-        df["Jumlah Unit Diperiksa"]
-    )
-
-    if (df["sigma_pi"] <= 0).any():
-        raise ValueError("Simpangan baku proporsi bernilai nol.")
-
-    # 4. Menghitung nilai Z
-    df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
-
-    # 5. Menghitung moving range
-    z_arr = df["z_i"].to_numpy(dtype=float)
-    mr_vals = np.abs(np.diff(z_arr))
-
-    df["R_i"] = np.concatenate(([np.nan], mr_vals))
-
-    R_bar = float(np.mean(mr_vals))
-    sigma_z = R_bar / 1.128
-
-    # 6. Identifikasi overdispersi
-    overdispersi = bool(sigma_z > 1)
-
-    # 7. Menghitung batas kendali P-Chart
-    df["BKA_P"] = np.minimum(
-        1.0,
-        p_bar + 3 * df["sigma_pi"]
-    )
-
-    df["BKB_P"] = np.maximum(
-        0.0,
-        p_bar - 3 * df["sigma_pi"]
-    )
-
-    # 8. Menghitung batas kendali Laney P'
-    df["BKA_Laney"] = np.minimum(
-        1.0,
-        p_bar + 3 * sigma_z * df["sigma_pi"]
-    )
-
-    df["BKB_Laney"] = np.maximum(
-        0.0,
-        p_bar - 3 * sigma_z * df["sigma_pi"]
-    )
-
-    # 9. Menentukan batas kendali yang digunakan
-    if overdispersi:
-        df["BKA_Aktif"] = df["BKA_Laney"]
-        df["BKB_Aktif"] = df["BKB_Laney"]
-        jenis = "Peta Kendali Laney P'"
-    else:
-        df["BKA_Aktif"] = df["BKA_P"]
-        df["BKB_Aktif"] = df["BKB_P"]
-        jenis = "Peta Kendali P"
-
-    # 10. Menentukan garis tengah dan status kendali
-    df["CL"] = p_bar
-
-    df["Status_OOC"] = (
-        (df["p_i"] > df["BKA_Aktif"]) |
-        (df["p_i"] < df["BKB_Aktif"])
-    )
-
-    # 11. Ringkasan hasil
-    ringkasan = {
-        "m": int(len(df)),
-        "p_bar": p_bar,
-        "R_bar": R_bar,
-        "sigma_z": sigma_z,
-        "is_overdispersed": overdispersi,
-        "chart_type": jenis,
-        "jumlah_ooc": int(df["Status_OOC"].sum()),
-        "jumlah_ic": int((~df["Status_OOC"]).sum())
-    }
-
-    return df, ringkasan
-
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
@@ -797,95 +691,181 @@ def halaman_overdispersi():
         st.markdown(f'<div class="interp-box interp-dark">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
 
 def halaman_peta_kendali():
-    render_header(judul="Analisis Peta Kendali")
+    render_header(
+        judul="Analisis Peta Kendali",
+        subjudul="Pemantauan dan Revisi Bertahap Berdasarkan Data Produksi"
+    )
+
     if st.session_state.df_produksi is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    dasar = st.session_state.df_produksi.copy().reset_index(drop=True)
+    dasar = st.session_state.df_produksi.copy()
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
 
-    if st.session_state.riwayat_iterasi:
-        col_info, col_reset = st.columns([4, 1])
-        with col_info:
-            st.markdown(f'<div class="interp-box interp-dark">Menampilkan <b>{len(st.session_state.riwayat_iterasi) + 1} tahap</b> analisis peta kendali.</div>', unsafe_allow_html=True)
-        with col_reset:
-            if st.button("Reset ke Tahap 1", use_container_width=True):
-                st.session_state.riwayat_iterasi = []
-                st.session_state.excluded_subgroups = []
-                st.rerun()
+    try:
+        tahapan, pakai_laney = hitung_tahapan_peta_kendali(dasar)
+    except Exception as e:
+        st.error(f"Perhitungan peta kendali gagal: {e}")
+        return
 
-    semua_tahap = [[]]
-    kumulatif = []
-    for dikeluarkan_tahap in st.session_state.riwayat_iterasi:
-        kumulatif = kumulatif + list(dikeluarkan_tahap)
-        semua_tahap.append(list(kumulatif))
+    if not tahapan:
+        st.warning("Tidak terdapat tahapan yang dapat dihitung.")
+        return
 
-    for idx, dikeluarkan in enumerate(semua_tahap):
-        tahap_ke = idx + 1
-        is_tahap_terakhir = (idx == len(semua_tahap) - 1)
-        df_tahap = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
+    metode = "Laney P'" if pakai_laney else "P-Chart"
 
-        if idx > 0:
-            st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+    st.info(
+        f"Metode yang digunakan: **{metode}**. "
+        f"Jumlah tahap dihitung otomatis berdasarkan data yang diunggah."
+    )
+
+    for hasil_tahap in tahapan:
+
+        tahap_ke = hasil_tahap["tahap"]
+        df_ctrl = hasil_tahap["data"]
+        res = hasil_tahap["ringkasan"]
+        ooc = hasil_tahap["ooc"]
+        dikeluarkan = hasil_tahap["dikeluarkan_sebelumnya"]
+
+        st.markdown("---")
         st.markdown(f"## Peta Kendali — Tahap {tahap_ke}")
-        if dikeluarkan:
-            st.caption(f"Subgrup yang telah dikeluarkan hingga tahap ini: **{', '.join(map(str, dikeluarkan))}**")
 
-        try:
-            df_ctrl, res = hitung_peta_kendali(df_tahap)
-        except Exception as e:
-            st.error(f"Tahap {tahap_ke} tidak dapat dihitung: {e}")
-            break
+        if dikeluarkan:
+            st.caption(
+                "Subgrup yang telah dikeluarkan pada tahap sebelumnya: "
+                + ", ".join(map(str, dikeluarkan))
+            )
 
         a, b, c = st.columns(3)
-        render_kpi(a, None, f"Jenis Peta (Tahap {tahap_ke})", res["chart_type"])
-        render_kpi(b, None, "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
-        render_kpi(c, None, "Subgrup Out of Control", str(res["jumlah_ooc"]))
 
-        st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+        render_kpi(
+            a, "📈", "icon-dark", "accent-dark",
+            "Jenis Peta Kendali", res["chart_type"]
+        )
 
+        render_kpi(
+            b, "—", "icon-dark", "accent-yellow",
+            "Garis Tengah (CL)", f"{res['p_bar']:.5f}"
+        )
+
+        render_kpi(
+            c, "⚠", "icon-red", "accent-red",
+            "Jumlah Subgrup OOC", str(res["jumlah_ooc"])
+        )
+
+        # Grafik peta kendali
         fig = go.Figure()
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"], mode="lines", name="BKA", line=dict(color=MERAH, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines", name="CL", line=dict(color=HITAM, width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"], mode="lines", name="BKB", line=dict(color=KUNING, dash="dash", width=2)))
-        fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat (pi)", line=dict(color=MERAH, width=2), marker=dict(size=7, color=HITAM)))
 
-        ooc = df_ctrl[df_ctrl["Status_OOC"]]
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"],
+            y=df_ctrl["BKA_Aktif"],
+            mode="lines",
+            name="BKA",
+            line=dict(color=MERAH, dash="dash", width=2)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"],
+            y=df_ctrl["CL"],
+            mode="lines",
+            name="CL",
+            line=dict(color=BIRU, width=2)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"],
+            y=df_ctrl["BKB_Aktif"],
+            mode="lines",
+            name="BKB",
+            line=dict(color=KUNING, dash="dash", width=2)
+        ))
+
+        fig.add_trace(go.Scatter(
+            x=df_ctrl["Subgrup"],
+            y=df_ctrl["p_i"],
+            mode="lines+markers",
+            name="Proporsi Cacat (pi)",
+            line=dict(color=HITAM, width=2),
+            marker=dict(size=7)
+        ))
+
+        # Menandai titik OOC
         if not ooc.empty:
-            fig.add_trace(go.Scatter(x=ooc["Subgrup"], y=ooc["p_i"], mode="markers", name="Out of Control", marker=dict(color=MERAH, size=12, symbol="diamond")))
-
-        fig.update_layout(title=f"{res['chart_type']} — Tahap {tahap_ke}", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
-        st.plotly_chart(style_plotly(fig), use_container_width=True)
-
-        if is_tahap_terakhir:
-            if ooc.empty:
-                st.markdown(f'<div class="interp-box interp-yellow"><b>Proses Sudah Terkendali Statistik pada Tahap {tahap_ke}.</b> Seluruh subgrup ({res["jumlah_ic"]} subgrup) berada di dalam batas kendali.</div>', unsafe_allow_html=True)
-            else:
-                st.markdown(f'<div class="interp-box interp-red">Masih ditemukan <b>{res["jumlah_ooc"]} subgrup Out of Control</b> pada Tahap {tahap_ke}: Subgrup <b>{", ".join(ooc["Subgrup"].astype(str).tolist())}</b>.</div>', unsafe_allow_html=True)
-
-                pilihan_ooc = st.multiselect(
-                    f"Pilih subgrup OOC Tahap {tahap_ke} yang memiliki penyebab khusus untuk dikeluarkan:",
-                    options=ooc["Subgrup"].astype(int).tolist(),
-                    default=ooc["Subgrup"].astype(int).tolist(),
-                    key=f"pilih_ooc_tahap_{tahap_ke}"
+            fig.add_trace(go.Scatter(
+                x=ooc["Subgrup"],
+                y=ooc["p_i"],
+                mode="markers",
+                name="Out of Control",
+                marker=dict(
+                    color=MERAH,
+                    size=12,
+                    symbol="diamond"
                 )
-                alasan = st.text_input(
-                    f"Catatan penyebab khusus (Tahap {tahap_ke}):",
-                    placeholder="Contoh: Kerusakan mesin potong / variasi bahan baku",
-                    key=f"alasan_tahap_{tahap_ke}"
-                )
+            ))
 
-                if st.button(f"Lanjut Analisis Peta Kendali Tahap {tahap_ke + 1}", key=f"btn_lanjut_{tahap_ke}", disabled=(not pilihan_ooc)):
-                    st.session_state.riwayat_iterasi.append([int(x) for x in pilihan_ooc])
-                    for sg in pilihan_ooc:
-                        tgl = ooc.loc[ooc["Subgrup"] == sg, "Tanggal"].iloc[0]
-                        st.session_state.excluded_subgroups.append({
-                            "Subgrup": int(sg),
-                            "Tanggal": str(pd.Timestamp(tgl).date()),
-                            "Alasan": alasan.strip() if alasan.strip() else f"Penyebab khusus (Revisi Tahap {tahap_ke})"
-                        })
-                    st.rerun()
+        fig.update_layout(
+            title=f"{res['chart_type']} — Tahap {tahap_ke}",
+            xaxis_title="Subgrup",
+            yaxis_title="Proporsi Cacat"
+        )
+
+        st.plotly_chart(
+            style_plotly(fig),
+            use_container_width=True
+        )
+
+        # Tabel perhitungan
+        with st.expander(
+            f"Lihat Tabel Perhitungan Tahap {tahap_ke}",
+            expanded=(tahap_ke == tahapan[-1]["tahap"])
+        ):
+            tampil = df_ctrl.copy()
+            tampil["Tanggal"] = pd.to_datetime(
+                tampil["Tanggal"]
+            ).dt.strftime("%Y-%m-%d")
+
+            st.dataframe(
+                tampil,
+                use_container_width=True,
+                hide_index=True
+            )
+
+        # Informasi subgrup OOC
+        if not ooc.empty:
+            daftar_ooc = ", ".join(
+                ooc["Subgrup"].astype(str).tolist()
+            )
+
+            st.warning(
+                f"**Tahap {tahap_ke} belum terkendali secara statistik.** "
+                f"Ditemukan {len(ooc)} subgrup OOC, yaitu: {daftar_ooc}."
+            )
+
+        else:
+            st.success(
+                f"**Proses sudah terkendali secara statistik pada Tahap {tahap_ke}.** "
+                f"Seluruh {res['jumlah_ic']} subgrup berada di dalam batas kendali."
+            )
+
+    # Ringkasan hasil akhir
+    tahap_akhir = tahapan[-1]
+    ooc_akhir = tahap_akhir["ooc"]
+
+    st.markdown("---")
+    st.markdown("## Ringkasan Hasil Analisis")
+
+    if ooc_akhir.empty:
+        st.success(
+            f"Proses mencapai kondisi In Control pada "
+            f"**Tahap {tahap_akhir['tahap']}**."
+        )
+    else:
+        st.error(
+            f"Proses belum terkendali sampai tahap terakhir "
+            f"yang dapat dihitung. Masih terdapat "
+            f"{len(ooc_akhir)} subgrup OOC."
+        )
 
 def halaman_runs_test():
     render_header(judul="Uji Keacakan (Runs Test)")
