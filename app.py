@@ -596,6 +596,112 @@ def get_data_aktif():
     aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
     return dasar, aktif
 
+def hitung_peta_kendali(df_input):
+    """Menghitung P-Chart atau Laney P' berdasarkan data yang digunakan."""
+
+    df = df_input.copy()
+
+    if len(df) < 2:
+        raise ValueError("Minimal diperlukan dua subgrup untuk menghitung moving range.")
+
+    if "Subgrup" not in df.columns:
+        df["Subgrup"] = np.arange(1, len(df) + 1)
+
+    if (df["Jumlah Unit Diperiksa"] <= 0).any():
+        raise ValueError("Jumlah unit diperiksa harus lebih besar dari 0.")
+
+    df = df.sort_values("Subgrup").reset_index(drop=True)
+
+    # 1. Menghitung proporsi cacat setiap subgrup
+    df["p_i"] = (
+        df["Jumlah Produk Cacat"] /
+        df["Jumlah Unit Diperiksa"]
+    )
+
+    # 2. Menghitung rata-rata proporsi cacat
+    p_bar = float(df["p_i"].mean())
+
+    if not (0 < p_bar < 1):
+        raise ValueError("Rata-rata proporsi cacat harus berada di antara 0 dan 1.")
+
+    # 3. Menghitung simpangan baku proporsi
+    df["sigma_pi"] = np.sqrt(
+        p_bar * (1 - p_bar) /
+        df["Jumlah Unit Diperiksa"]
+    )
+
+    if (df["sigma_pi"] <= 0).any():
+        raise ValueError("Simpangan baku proporsi bernilai nol.")
+
+    # 4. Menghitung nilai Z
+    df["z_i"] = (df["p_i"] - p_bar) / df["sigma_pi"]
+
+    # 5. Menghitung moving range
+    z_arr = df["z_i"].to_numpy(dtype=float)
+    mr_vals = np.abs(np.diff(z_arr))
+
+    df["R_i"] = np.concatenate(([np.nan], mr_vals))
+
+    R_bar = float(np.mean(mr_vals))
+    sigma_z = R_bar / 1.128
+
+    # 6. Identifikasi overdispersi
+    overdispersi = bool(sigma_z > 1)
+
+    # 7. Menghitung batas kendali P-Chart
+    df["BKA_P"] = np.minimum(
+        1.0,
+        p_bar + 3 * df["sigma_pi"]
+    )
+
+    df["BKB_P"] = np.maximum(
+        0.0,
+        p_bar - 3 * df["sigma_pi"]
+    )
+
+    # 8. Menghitung batas kendali Laney P'
+    df["BKA_Laney"] = np.minimum(
+        1.0,
+        p_bar + 3 * sigma_z * df["sigma_pi"]
+    )
+
+    df["BKB_Laney"] = np.maximum(
+        0.0,
+        p_bar - 3 * sigma_z * df["sigma_pi"]
+    )
+
+    # 9. Menentukan batas kendali yang digunakan
+    if overdispersi:
+        df["BKA_Aktif"] = df["BKA_Laney"]
+        df["BKB_Aktif"] = df["BKB_Laney"]
+        jenis = "Peta Kendali Laney P'"
+    else:
+        df["BKA_Aktif"] = df["BKA_P"]
+        df["BKB_Aktif"] = df["BKB_P"]
+        jenis = "Peta Kendali P"
+
+    # 10. Menentukan garis tengah dan status kendali
+    df["CL"] = p_bar
+
+    df["Status_OOC"] = (
+        (df["p_i"] > df["BKA_Aktif"]) |
+        (df["p_i"] < df["BKB_Aktif"])
+    )
+
+    # 11. Ringkasan hasil
+    ringkasan = {
+        "m": int(len(df)),
+        "p_bar": p_bar,
+        "R_bar": R_bar,
+        "sigma_z": sigma_z,
+        "is_overdispersed": overdispersi,
+        "chart_type": jenis,
+        "jumlah_ooc": int(df["Status_OOC"].sum()),
+        "jumlah_ic": int((~df["Status_OOC"]).sum())
+    }
+
+    return df, ringkasan
+
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
