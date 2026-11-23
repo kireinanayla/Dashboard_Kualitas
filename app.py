@@ -921,10 +921,7 @@ def halaman_overdispersi():
         st.markdown(f'<div class="interp-box interp-dark">Nilai Sigma Z = <b>{res["sigma_z"]:.4f} &le; 1</b>, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: <b>{res["chart_type"]}</b>.</div>', unsafe_allow_html=True)
 
 def halaman_peta_kendali():
-    render_header(
-        judul="Analisis Peta Kendali",
-        subjudul="Pemantauan dan Revisi Bertahap Berdasarkan Data Produksi"
-    )
+    render_header(judul="Analisis Peta Kendali")
 
     if st.session_state.df_produksi is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -942,13 +939,6 @@ def halaman_peta_kendali():
     if not tahapan:
         st.warning("Tidak terdapat tahapan yang dapat dihitung.")
         return
-
-    metode = "Laney P'" if pakai_laney else "P-Chart"
-
-    st.info(
-        f"Metode yang digunakan: **{metode}**. "
-        f"Jumlah tahap dihitung otomatis berdasarkan data yang diunggah."
-    )
 
     for hasil_tahap in tahapan:
 
