@@ -1512,6 +1512,7 @@ def generate_usulan_perbaikan(failure_mode, dampak, penyebab=""):
     )
 
 
+
 def halaman_fmea():
     render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
@@ -1520,20 +1521,19 @@ def halaman_fmea():
         '<div class="action-header"><div class="action-badge">i</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
         '<div class="fmea-guide-text">'
         '• <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
-        '• <b>Dampak Kegagalan</b> diisi berdasarkan dampak yang ditimbulkan oleh penyebab kegagalan terhadap proses atau kualitas produk.<br>'
         '• <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>'
-        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil dan hampir tidak berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>'
         '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>'
-        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi dan berpengaruh terhadap kualitas produk.<br>'
-        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar dan dapat menyebabkan gangguan operasional serius.<br>'
-        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Dampak kegagalan sangat parah hingga menyebabkan kerugian atau gangguan operasional total.<br>'
-        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya (4 Tingkatan):</b><br>'
-        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi ≤ 1 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>'
+        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>'
         '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>'
         '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>'
-        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi > 6 kali dalam 6 bulan.<br>'
-        '• <b>RPN (Risk Priority Number) = Severity × Occurrence</b>. Semakin tinggi nilai RPN, semakin tinggi prioritas penanganan penyebab kegagalan tersebut.<br>'
-        '• <b>Usulan Perbaikan</b> dihasilkan secara otomatis berdasarkan identifikasi penyebab dan dampak kegagalan. Usulan ini merupakan rekomendasi awal yang perlu ditinjau kembali.'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>'
+        '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>'
+        '&nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.'
         '</div></div>'
     )
 
@@ -1552,16 +1552,16 @@ def halaman_fmea():
 
     if not daftar_fishbone:
         st.warning(
-            "Belum ada data penyebab dari halaman Diagram Sebab-Akibat "
-            "(Fishbone). Silakan isi penyebab kecacatan pada menu "
-            "Diagram Sebab-Akibat terlebih dahulu agar otomatis "
-            "muncul di tabel ini."
+            "Belum ada data penyebab dari halaman "
+            "**Diagram Sebab-Akibat (Fishbone)**. Silakan isi "
+            "penyebab kecacatan pada menu Diagram Sebab-Akibat "
+            "terlebih dahulu agar otomatis muncul di tabel ini."
         )
         return
 
     df_base = pd.DataFrame(daftar_fishbone)
 
-    # Mengambil skor sebelumnya agar tidak hilang ketika halaman dirender ulang
+    # Mengambil nilai Severity dan Occurrence yang tersimpan
     kolom_kunci = [
         "Kategori (5M & 1E)",
         "Failure Mode / Penyebab Kegagalan"
@@ -1571,11 +1571,7 @@ def halaman_fmea():
         not st.session_state.fmea_scores.empty
         and all(k in st.session_state.fmea_scores.columns for k in kolom_kunci)
     ):
-        kolom_simpan = kolom_kunci + [
-            "Dampak Kegagalan",
-            "Severity",
-            "Occurrence"
-        ]
+        kolom_simpan = kolom_kunci + ["Severity", "Occurrence"]
 
         kolom_tersedia = [
             kol for kol in kolom_simpan
@@ -1595,19 +1591,12 @@ def halaman_fmea():
     else:
         df_merged = df_base.copy()
 
-    # Menyiapkan nilai awal
-    if "Dampak Kegagalan" not in df_merged.columns:
-        df_merged["Dampak Kegagalan"] = ""
-
+    # Nilai awal Severity dan Occurrence
     if "Severity" not in df_merged.columns:
         df_merged["Severity"] = 1
 
     if "Occurrence" not in df_merged.columns:
         df_merged["Occurrence"] = 1
-
-    df_merged["Dampak Kegagalan"] = (
-        df_merged["Dampak Kegagalan"].fillna("")
-    )
 
     df_merged["Severity"] = (
         df_merged["Severity"].fillna(1).clip(1, 5).astype(int)
@@ -1617,7 +1606,15 @@ def halaman_fmea():
         df_merged["Occurrence"].fillna(1).clip(1, 4).astype(int)
     )
 
-    st.markdown("### Input Dampak Kegagalan, Severity & Occurrence")
+    df_merged["RPN (S × O)"] = (
+        df_merged["Severity"] * df_merged["Occurrence"]
+    )
+
+    df_merged["Keterangan Prioritas"] = (
+        df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    )
+
+    st.markdown("### Input Skor Severity & Occurrence")
 
     edited_fmea = st.data_editor(
         df_merged,
@@ -1632,9 +1629,6 @@ def halaman_fmea():
                 "Failure Mode / Penyebab Kegagalan",
                 disabled=True
             ),
-            "Dampak Kegagalan": st.column_config.TextColumn(
-                "Dampak Kegagalan"
-            ),
             "Severity": st.column_config.NumberColumn(
                 "Severity (1–5)",
                 min_value=1,
@@ -1648,12 +1642,20 @@ def halaman_fmea():
                 max_value=4,
                 step=1,
                 required=True
+            ),
+            "RPN (S × O)": st.column_config.NumberColumn(
+                "RPN (S × O)",
+                disabled=True
+            ),
+            "Keterangan Prioritas": st.column_config.TextColumn(
+                "Keterangan Prioritas",
+                disabled=True
             )
         },
         key="editor_fmea_otomatis"
     )
 
-    # Menghitung RPN dan menghasilkan rekomendasi otomatis
+    # Menghitung RPN dan menyimpan hasil input
     hasil_akhir = edited_fmea.copy()
 
     hasil_akhir["Severity"] = (
@@ -1672,16 +1674,6 @@ def halaman_fmea():
         hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
     )
 
-    hasil_akhir["Usulan Perbaikan"] = hasil_akhir.apply(
-        lambda row: generate_usulan_perbaikan(
-            failure_mode=row["Failure Mode / Penyebab Kegagalan"],
-            dampak=row["Dampak Kegagalan"],
-            penyebab=row["Failure Mode / Penyebab Kegagalan"]
-        ),
-        axis=1
-    )
-
-    # Tombol menyimpan hasil pengisian dan perhitungan
     if st.button(
         "Hitung Nilai RPN & Urutkan Prioritas",
         use_container_width=True
@@ -1689,7 +1681,7 @@ def halaman_fmea():
         st.session_state.fmea_scores = hasil_akhir.copy()
         st.rerun()
 
-    # Mengurutkan hasil berdasarkan RPN tertinggi
+    # Mengurutkan berdasarkan RPN tertinggi
     hasil_akhir = hasil_akhir.sort_values(
         "RPN (S × O)",
         ascending=False
@@ -1732,6 +1724,7 @@ def halaman_fmea():
         file_name="Hasil_Analisis_FMEA_PT_XYZ.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
 
 MENU_ITEMS = {
