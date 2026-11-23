@@ -616,8 +616,8 @@ def hitung_peta_kendali(df_input, gunakan_laney=None):
         df["Jumlah Unit Diperiksa"]
     )
 
-    # Rata-rata proporsi subgrup
-    p_bar = float(df["p_i"].mean())
+    # Proporsi rata-rata tertimbang (sesuai rumus Excel: total cacat / total inspeksi)
+    p_bar = float(df["Jumlah Produk Cacat"].sum() / df["Jumlah Unit Diperiksa"].sum())
 
     if not 0 < p_bar < 1:
         raise ValueError("Rata-rata proporsi tidak valid.")
@@ -755,6 +755,77 @@ def hitung_tahapan_peta_kendali(df_input):
 
     return tahapan, pakai_laney
 
+
+def hitung_runs_test(data):
+    """Runs Test dua sisi terhadap median, tanpa koreksi kontinuitas."""
+    x = pd.Series(data, dtype="float64").dropna().to_numpy()
+    if len(x) < 2:
+        raise ValueError("Runs Test memerlukan minimal dua pengamatan.")
+
+    median = float(np.median(x))
+    # Nilai yang tepat sama dengan median tidak dimasukkan ke dua kelompok,
+    # sesuai prosedur Runs Test berbasis median.
+    tanda = np.where(x > median, 1, np.where(x < median, 0, np.nan))
+    tanda = tanda[~pd.isna(tanda)].astype(int)
+    n1 = int(np.sum(tanda == 1))
+    n2 = int(np.sum(tanda == 0))
+    if n1 == 0 or n2 == 0:
+        raise ValueError("Runs Test tidak dapat dihitung karena seluruh data berada pada satu sisi median.")
+
+    V = int(1 + np.sum(tanda[1:] != tanda[:-1]))
+    n = n1 + n2
+    mean_runs = (2 * n1 * n2) / n + 1
+    variance = (2 * n1 * n2 * (2 * n1 * n2 - n)) / (n**2 * (n - 1))
+    if variance <= 0:
+        raise ValueError("Varians Runs Test tidak valid untuk data ini.")
+    Z = float((V - mean_runs) / np.sqrt(variance))
+    p_value = float(2 * norm.sf(abs(Z)))
+    return {"median": median, "V": V, "Z": Z, "p_value": p_value,
+            "n1": n1, "n2": n2, "expected_runs": mean_runs,
+            "std_runs": float(np.sqrt(variance))}
+
+
+def hitung_ppk_persen(p_bar):
+    """Menghitung Z(p-bar) dan P%pk = Z/3 dari proporsi cacat."""
+    p_bar = float(p_bar)
+    if not 0 < p_bar < 1:
+        raise ValueError("Proporsi cacat harus berada di antara 0 dan 1.")
+    z_p = float(norm.ppf(1 - p_bar))
+    return z_p, z_p / 3
+
+
+def hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5):
+    """Menghitung DPO, DPMO, dan level sigma dengan shift yang ditentukan."""
+    total_cacat = float(total_cacat)
+    total_unit = float(total_unit)
+    peluang_per_unit = float(peluang_per_unit)
+    if total_unit <= 0 or peluang_per_unit <= 0:
+        raise ValueError("Jumlah unit dan peluang per unit harus lebih besar dari nol.")
+    if total_cacat < 0:
+        raise ValueError("Jumlah produk cacat tidak boleh negatif.")
+    dpo = total_cacat / (total_unit * peluang_per_unit)
+    dpmo = dpo * 1_000_000
+    if dpo <= 0:
+        sigma = float("inf")
+    elif dpo >= 1:
+        sigma = float("-inf")
+    else:
+        sigma = float(norm.ppf(1 - dpo) + float(shift))
+    return float(dpo), float(dpmo), sigma
+
+
+def get_data_final_in_control():
+    """Ambil subgrup tersisa setelah iterasi otomatis peta kendali."""
+    if st.session_state.df_produksi is None:
+        return None
+    dasar = st.session_state.df_produksi.copy()
+    dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
+    tahapan, _ = hitung_tahapan_peta_kendali(dasar)
+    if not tahapan:
+        return dasar
+    return tahapan[-1]["data"].copy()
+
+
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
@@ -840,7 +911,7 @@ def halaman_overdispersi():
     a, b, c, d = st.columns(4)
     render_kpi(a, "p̄", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
     render_kpi(b, "R̄", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
-    render_kpi(c, "σz", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
+    render_kpi(c, "σz", "Sigma Z", f"{res['sigma_z']:.4f}")
     render_kpi(d, None, "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
@@ -971,22 +1042,6 @@ def halaman_peta_kendali():
             use_container_width=True
         )
 
-        # Tabel perhitungan
-        with st.expander(
-            f"Lihat Tabel Perhitungan Tahap {tahap_ke}",
-            expanded=(tahap_ke == tahapan[-1]["tahap"])
-        ):
-            tampil = df_ctrl.copy()
-            tampil["Tanggal"] = pd.to_datetime(
-                tampil["Tanggal"]
-            ).dt.strftime("%Y-%m-%d")
-
-            st.dataframe(
-                tampil,
-                use_container_width=True,
-                hide_index=True
-            )
-
         # Informasi subgrup OOC
         if not ooc.empty:
             daftar_ooc = ", ".join(
@@ -1025,12 +1080,13 @@ def halaman_peta_kendali():
 
 def halaman_runs_test():
     render_header(judul="Uji Keacakan (Runs Test)")
-    dasar, aktif = get_data_aktif()
+    dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
     try:
-        df_ctrl, _ = hitung_peta_kendali(aktif)
+        df_ctrl = get_data_final_in_control()
+        df_ctrl, _ = hitung_peta_kendali(df_ctrl)
         rt = hitung_runs_test(df_ctrl["p_i"])
     except Exception as e:
         st.error(str(e))
@@ -1057,12 +1113,12 @@ def halaman_runs_test():
 
 def halaman_kapabilitas():
     render_header(judul="Indeks Kapabilitas Proses")
-    dasar, aktif = get_data_aktif()
+    dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
     try:
-        _, res = hitung_peta_kendali(aktif)
+        _, res = hitung_peta_kendali(dasar)
         z_p, ppk = hitung_ppk_persen(res["p_bar"])
     except Exception as e:
         st.error(str(e))
@@ -1100,10 +1156,8 @@ def halaman_level_sigma():
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
 
-    data_uji = aktif if (aktif is not None and not aktif.empty) else dasar
-    if st.session_state.excluded_subgroups:
-        st.caption(f"Menghitung Level Sigma pada data aktif ({len(data_uji)} subgrup) setelah mengeluarkan {len(st.session_state.excluded_subgroups)} subgrup penyebab khusus.")
-
+    # Level Sigma dihitung dari seluruh data yang diunggah (data mentah).
+    data_uji = dasar
     total_cacat = int(data_uji["Jumlah Produk Cacat"].sum())
     total_unit = int(data_uji["Jumlah Unit Diperiksa"].sum())
 
