@@ -899,18 +899,15 @@ def halaman_peta_kendali():
         a, b, c = st.columns(3)
 
         render_kpi(
-            a, "📈", "icon-dark", "accent-dark",
-            "Jenis Peta Kendali", res["chart_type"]
+            a, "📈", "Jenis Peta Kendali", res["chart_type"]
         )
 
         render_kpi(
-            b, "—", "icon-dark", "accent-yellow",
-            "Garis Tengah (CL)", f"{res['p_bar']:.5f}"
+            b, "—", "Garis Tengah (CL)", f"{res['p_bar']:.5f}"
         )
 
         render_kpi(
-            c, "⚠", "icon-red", "accent-red",
-            "Jumlah Subgrup OOC", str(res["jumlah_ooc"])
+            c, "⚠", "Jumlah Subgrup OOC", str(res["jumlah_ooc"])
         )
 
         # Grafik peta kendali
@@ -929,7 +926,7 @@ def halaman_peta_kendali():
             y=df_ctrl["CL"],
             mode="lines",
             name="CL",
-            line=dict(color=BIRU, width=2)
+            line=dict(color=HITAM, width=2)
         ))
 
         fig.add_trace(go.Scatter(
