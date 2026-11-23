@@ -1381,6 +1381,137 @@ def kategori_prioritas_rpn(rpn):
     else:
         return "Prioritas Rendah (Pemantauan Rutin)"
 
+
+def generate_usulan_perbaikan(failure_mode, dampak, penyebab=""):
+    teks = " ".join([
+        str(failure_mode),
+        str(dampak),
+        str(penyebab)
+    ]).lower()
+
+    aturan = [
+        (
+            ["lengket", "melekat", "menempel", "mould box", "cetakan"],
+            "Melakukan pemeriksaan dan pembersihan mould box "
+            "secara berkala serta memastikan pelumasan sesuai "
+            "prosedur agar produk tidak melekat pada cetakan."
+        ),
+        (
+            ["gompal", "terkelupas", "pecah", "retak"],
+            "Melakukan evaluasi penanganan dan pemindahan produk, "
+            "memeriksa kondisi peralatan, serta memastikan produk "
+            "ditangani sesuai prosedur untuk mengurangi kerusakan."
+        ),
+        (
+            ["bolong", "berlubang", "rongga", "gelembung"],
+            "Memeriksa konsistensi campuran bahan baku dan "
+            "parameter proses produksi serta melakukan pengawasan "
+            "agar struktur produk terbentuk secara merata."
+        ),
+        (
+            ["dimensi", "ukuran", "wire", "kawat", "meleot", "putus"],
+            "Melakukan pemeriksaan kondisi dan ketegangan wire "
+            "secara berkala, memastikan posisi pemotongan sesuai "
+            "standar, serta mengganti wire yang mengalami kerusakan."
+        ),
+        (
+            ["kurang mengembang", "pengembangan", "mengembang"],
+            "Melakukan pengawasan terhadap komposisi bahan baku "
+            "dan parameter proses pengembangan serta memastikan "
+            "kondisi proses sesuai standar operasional."
+        ),
+        (
+            ["berat jenis", "kepadatan", "density"],
+            "Melakukan pengendalian komposisi bahan baku dan "
+            "memantau parameter proses untuk menjaga keseragaman "
+            "berat jenis produk."
+        ),
+    ]
+
+    hasil = []
+    for kata_kunci, saran in aturan:
+        if any(kata in teks for kata in kata_kunci):
+            hasil.append(saran)
+
+    if hasil:
+        return " ".join(dict.fromkeys(hasil))
+
+    return (
+        "Melakukan evaluasi terhadap penyebab kegagalan, "
+        "memeriksa kondisi proses dan peralatan terkait, serta "
+        "menetapkan tindakan pencegahan berdasarkan hasil "
+        "identifikasi penyebab kegagalan."
+    )
+
+
+
+def generate_usulan_perbaikan(failure_mode, dampak, penyebab=""):
+    """
+    Menghasilkan rekomendasi perbaikan berdasarkan failure mode
+    dan dampak kegagalan menggunakan pencocokan kata kunci.
+    """
+    teks = " ".join([
+        str(failure_mode),
+        str(dampak),
+        str(penyebab)
+    ]).lower()
+
+    aturan = [
+        (
+            ["lengket", "melekat", "menempel", "mould box", "cetakan"],
+            "Melakukan pemeriksaan dan pembersihan mould box secara "
+            "berkala serta memastikan pelumasan sesuai prosedur "
+            "agar produk tidak melekat pada cetakan."
+        ),
+        (
+            ["gompal", "terkelupas", "pecah", "retak"],
+            "Mengevaluasi proses penanganan dan pemindahan produk, "
+            "memeriksa kondisi peralatan, serta memastikan produk "
+            "ditangani sesuai prosedur untuk mengurangi kerusakan."
+        ),
+        (
+            ["bolong", "berlubang", "rongga", "gelembung"],
+            "Memeriksa konsistensi campuran bahan baku dan parameter "
+            "proses produksi untuk memastikan struktur produk "
+            "terbentuk secara merata."
+        ),
+        (
+            ["dimensi", "ukuran", "wire", "kawat", "meleot", "putus"],
+            "Memeriksa kondisi dan ketegangan wire secara berkala, "
+            "memastikan posisi pemotongan sesuai standar, serta "
+            "mengganti wire yang mengalami kerusakan."
+        ),
+        (
+            ["kurang mengembang", "pengembangan", "mengembang"],
+            "Mengawasi komposisi bahan baku dan parameter proses "
+            "pengembangan serta memastikan proses berjalan sesuai "
+            "standar operasional."
+        ),
+        (
+            ["berat jenis", "kepadatan", "density"],
+            "Mengendalikan komposisi bahan baku dan memantau "
+            "parameter proses untuk menjaga keseragaman berat "
+            "jenis produk."
+        )
+    ]
+
+    hasil = []
+
+    for kata_kunci, saran in aturan:
+        if any(kata in teks for kata in kata_kunci):
+            hasil.append(saran)
+
+    if hasil:
+        return " ".join(dict.fromkeys(hasil))
+
+    return (
+        "Melakukan evaluasi terhadap penyebab kegagalan, memeriksa "
+        "kondisi proses dan peralatan terkait, serta menetapkan "
+        "tindakan pencegahan berdasarkan hasil identifikasi "
+        "penyebab kegagalan."
+    )
+
+
 def halaman_fmea():
     render_header(judul="Failure Mode and Effects Analysis (FMEA)")
 
@@ -1389,24 +1520,28 @@ def halaman_fmea():
         '<div class="action-header"><div class="action-badge">i</div><h3 class="action-title">Panduan Pengisian & Cara Membaca Nilai RPN</h3></div>'
         '<div class="fmea-guide-text">'
         '• <b>Failure Mode / Potensi Kegagalan</b> pada tabel di bawah ditarik secara otomatis dari hasil isian pada halaman <b>Diagram Sebab-Akibat (Fishbone)</b>.<br>'
+        '• <b>Dampak Kegagalan</b> diisi berdasarkan dampak yang ditimbulkan oleh penyebab kegagalan terhadap proses atau kualitas produk.<br>'
         '• <b>Severity (S) — Nilai Keseriusan Risiko (5 Tingkatan):</b><br>'
-        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil (hampir tidak ada kerugian) dan tidak berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Kerusakan/kerugian kecil dan hampir tidak berpengaruh terhadap kualitas produk.<br>'
         '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Kerusakan/kerugian sedang dan berpengaruh terhadap kualitas produk.<br>'
-        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi (misal: pesanan pelanggan batal, beberapa mesin rusak) dan berpengaruh terhadap kualitas produk.<br>'
-        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar (misal: kebakaran, banjir, bencana, seluruh mesin rusak) dan menyebabkan perusahaan tidak beroperasi lama atau lebih dari satu bulan.<br>'
-        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Bencana alam yang menyebabkan <i>total breakdown system</i> (kebangkrutan).<br>'
-        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya Frekuensi (4 Tingkatan):</b><br>'
-        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi &le; 1 kali dalam 6 bulan.<br>'
+        '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Kerusakan/kerugian tinggi dan berpengaruh terhadap kualitas produk.<br>'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Kerusakan/kerugian sangat besar dan dapat menyebabkan gangguan operasional serius.<br>'
+        '&nbsp;&nbsp;&nbsp;5. <b>Disaster (5):</b> Dampak kegagalan sangat parah hingga menyebabkan kerugian atau gangguan operasional total.<br>'
+        '• <b>Occurrence (O) — Tingkat Kemungkinan Terjadinya (4 Tingkatan):</b><br>'
+        '&nbsp;&nbsp;&nbsp;1. <b>Low (1):</b> Terjadi ≤ 1 kali dalam 6 bulan.<br>'
         '&nbsp;&nbsp;&nbsp;2. <b>Medium (2):</b> Terjadi 2–3 kali dalam 6 bulan.<br>'
         '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>'
-        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>'
-        '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>'
-        '&nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.'
+        '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi > 6 kali dalam 6 bulan.<br>'
+        '• <b>RPN (Risk Priority Number) = Severity × Occurrence</b>. Semakin tinggi nilai RPN, semakin tinggi prioritas penanganan penyebab kegagalan tersebut.<br>'
+        '• <b>Usulan Perbaikan</b> dihasilkan secara otomatis berdasarkan identifikasi penyebab dan dampak kegagalan. Usulan ini merupakan rekomendasi awal yang perlu ditinjau kembali.'
         '</div></div>'
     )
+
     st.markdown(panduan_html, unsafe_allow_html=True)
 
+    # Mengambil penyebab kegagalan dari halaman Fishbone
     daftar_fishbone = []
+
     for kat, teks in st.session_state.fishbone_inputs.items():
         for baris in teks.split("\n"):
             if baris.strip():
@@ -1416,79 +1551,188 @@ def halaman_fmea():
                 })
 
     if not daftar_fishbone:
-        st.warning("Belum ada data penyebab dari halaman **Diagram Sebab-Akibat (Fishbone)**. Silakan isi penyebab kecacatan pada menu Diagram Sebab-Akibat terlebih dahulu agar otomatis muncul di tabel ini.")
+        st.warning(
+            "Belum ada data penyebab dari halaman Diagram Sebab-Akibat "
+            "(Fishbone). Silakan isi penyebab kecacatan pada menu "
+            "Diagram Sebab-Akibat terlebih dahulu agar otomatis "
+            "muncul di tabel ini."
+        )
         return
 
     df_base = pd.DataFrame(daftar_fishbone)
 
-    if not st.session_state.fmea_scores.empty and "Failure Mode / Penyebab Kegagalan" in st.session_state.fmea_scores.columns:
+    # Mengambil skor sebelumnya agar tidak hilang ketika halaman dirender ulang
+    kolom_kunci = [
+        "Kategori (5M & 1E)",
+        "Failure Mode / Penyebab Kegagalan"
+    ]
+
+    if (
+        not st.session_state.fmea_scores.empty
+        and all(k in st.session_state.fmea_scores.columns for k in kolom_kunci)
+    ):
+        kolom_simpan = kolom_kunci + [
+            "Dampak Kegagalan",
+            "Severity",
+            "Occurrence"
+        ]
+
+        kolom_tersedia = [
+            kol for kol in kolom_simpan
+            if kol in st.session_state.fmea_scores.columns
+        ]
+
         skor_unik = st.session_state.fmea_scores[
-            ["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan", "Dampak Kegagalan", "Severity", "Occurrence", "Usulan Perbaikan"]
-        ].drop_duplicates(subset=["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan"])
+            kolom_tersedia
+        ].drop_duplicates(subset=kolom_kunci)
+
         df_merged = pd.merge(
             df_base,
             skor_unik,
-            on=["Kategori (5M & 1E)", "Failure Mode / Penyebab Kegagalan"],
+            on=kolom_kunci,
             how="left"
         )
     else:
         df_merged = df_base.copy()
+
+    # Menyiapkan nilai awal
+    if "Dampak Kegagalan" not in df_merged.columns:
         df_merged["Dampak Kegagalan"] = ""
+
+    if "Severity" not in df_merged.columns:
         df_merged["Severity"] = 1
+
+    if "Occurrence" not in df_merged.columns:
         df_merged["Occurrence"] = 1
-        df_merged["Usulan Perbaikan"] = ""
 
-    df_merged["Dampak Kegagalan"] = df_merged["Dampak Kegagalan"].fillna("")
-    df_merged["Severity"] = df_merged["Severity"].fillna(1).clip(1, 5).astype(int)
-    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).clip(1, 4).astype(int)
-    df_merged["Usulan Perbaikan"] = df_merged["Usulan Perbaikan"].fillna("")
-    df_merged["RPN (S × O)"] = df_merged["Severity"] * df_merged["Occurrence"]
-    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    df_merged["Dampak Kegagalan"] = (
+        df_merged["Dampak Kegagalan"].fillna("")
+    )
 
-    st.markdown("### Input Skor Severity & Occurrence")
+    df_merged["Severity"] = (
+        df_merged["Severity"].fillna(1).clip(1, 5).astype(int)
+    )
+
+    df_merged["Occurrence"] = (
+        df_merged["Occurrence"].fillna(1).clip(1, 4).astype(int)
+    )
+
+    st.markdown("### Input Dampak Kegagalan, Severity & Occurrence")
+
     edited_fmea = st.data_editor(
         df_merged,
         use_container_width=True,
         hide_index=True,
         column_config={
-            "Kategori (5M & 1E)": st.column_config.TextColumn("Kategori (5M & 1E)", disabled=True),
-            "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn("Failure Mode / Penyebab Kegagalan", disabled=True),
-            "Dampak Kegagalan": st.column_config.TextColumn("Dampak Kegagalan (Opsional)"),
-            "Severity": st.column_config.NumberColumn("Severity (1–5)", min_value=1, max_value=5, step=1, required=True),
-            "Occurrence": st.column_config.NumberColumn("Occurrence (1–4)", min_value=1, max_value=4, step=1, required=True),
-            "RPN (S × O)": st.column_config.NumberColumn("RPN (S × O)", disabled=True),
-            "Keterangan Prioritas": st.column_config.TextColumn("Keterangan Prioritas", disabled=True),
-            "Usulan Perbaikan": st.column_config.TextColumn("Usulan Perbaikan")
+            "Kategori (5M & 1E)": st.column_config.TextColumn(
+                "Kategori (5M & 1E)",
+                disabled=True
+            ),
+            "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn(
+                "Failure Mode / Penyebab Kegagalan",
+                disabled=True
+            ),
+            "Dampak Kegagalan": st.column_config.TextColumn(
+                "Dampak Kegagalan"
+            ),
+            "Severity": st.column_config.NumberColumn(
+                "Severity (1–5)",
+                min_value=1,
+                max_value=5,
+                step=1,
+                required=True
+            ),
+            "Occurrence": st.column_config.NumberColumn(
+                "Occurrence (1–4)",
+                min_value=1,
+                max_value=4,
+                step=1,
+                required=True
+            )
         },
         key="editor_fmea_otomatis"
     )
 
-    if st.button("Hitung Nilai RPN & Urutkan Prioritas", use_container_width=True):
-        hasil = edited_fmea.copy()
-        hasil["RPN (S × O)"] = hasil["Severity"].astype(int) * hasil["Occurrence"].astype(int)
-        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(kategori_prioritas_rpn)
-        st.session_state.fmea_scores = hasil
+    # Menghitung RPN dan menghasilkan rekomendasi otomatis
+    hasil_akhir = edited_fmea.copy()
+
+    hasil_akhir["Severity"] = (
+        hasil_akhir["Severity"].fillna(1).clip(1, 5).astype(int)
+    )
+
+    hasil_akhir["Occurrence"] = (
+        hasil_akhir["Occurrence"].fillna(1).clip(1, 4).astype(int)
+    )
+
+    hasil_akhir["RPN (S × O)"] = (
+        hasil_akhir["Severity"] * hasil_akhir["Occurrence"]
+    )
+
+    hasil_akhir["Keterangan Prioritas"] = (
+        hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    )
+
+    hasil_akhir["Usulan Perbaikan"] = hasil_akhir.apply(
+        lambda row: generate_usulan_perbaikan(
+            failure_mode=row["Failure Mode / Penyebab Kegagalan"],
+            dampak=row["Dampak Kegagalan"],
+            penyebab=row["Failure Mode / Penyebab Kegagalan"]
+        ),
+        axis=1
+    )
+
+    # Tombol menyimpan hasil pengisian dan perhitungan
+    if st.button(
+        "Hitung Nilai RPN & Urutkan Prioritas",
+        use_container_width=True
+    ):
+        st.session_state.fmea_scores = hasil_akhir.copy()
         st.rerun()
 
-    hasil_akhir = edited_fmea.copy()
-    hasil_akhir["RPN (S × O)"] = hasil_akhir["Severity"].astype(int) * hasil_akhir["Occurrence"].astype(int)
-    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
-    hasil_akhir = hasil_akhir.sort_values("RPN (S × O)", ascending=False).reset_index(drop=True)
-    hasil_akhir.insert(0, "Peringkat", np.arange(1, len(hasil_akhir) + 1))
+    # Mengurutkan hasil berdasarkan RPN tertinggi
+    hasil_akhir = hasil_akhir.sort_values(
+        "RPN (S × O)",
+        ascending=False
+    ).reset_index(drop=True)
 
-    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
-    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)")
-    st.dataframe(hasil_akhir, use_container_width=True, hide_index=True)
+    hasil_akhir.insert(
+        0,
+        "Peringkat",
+        np.arange(1, len(hasil_akhir) + 1)
+    )
 
+    st.markdown(
+        "<div style='height: 14px;'></div>",
+        unsafe_allow_html=True
+    )
+
+    st.markdown(
+        "### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)"
+    )
+
+    st.dataframe(
+        hasil_akhir,
+        use_container_width=True,
+        hide_index=True
+    )
+
+    # Download hasil FMEA
     out_fmea = io.BytesIO()
+
     with pd.ExcelWriter(out_fmea, engine="openpyxl") as writer:
-        hasil_akhir.to_excel(writer, index=False, sheet_name="Hasil_FMEA")
+        hasil_akhir.to_excel(
+            writer,
+            index=False,
+            sheet_name="Hasil_FMEA"
+        )
+
     st.download_button(
         "Download Tabel Hasil FMEA (.xlsx)",
         data=out_fmea.getvalue(),
         file_name="Hasil_Analisis_FMEA_PT_XYZ.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
+
 
 MENU_ITEMS = {
     "Beranda (Input Data)": halaman_beranda,
