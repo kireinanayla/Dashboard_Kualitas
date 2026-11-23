@@ -257,7 +257,7 @@ div[data-testid="stColumn"] [data-testid="stVerticalBlock"] {{
     display: flex;
     align-items: center;
     gap: 14px;
-    box-shadow: 0 8px 22px rgba(26, 28, 32, 0.11);
+    box-shadow: 0 10px 26px rgba(26, 28, 32, 0.17);
     border: 1px solid #E2E5EA;
     position: relative;
     overflow: hidden;
@@ -970,6 +970,9 @@ def halaman_peta_kendali():
             c, "⚠", "Jumlah Subgrup Out of Control", str(res["jumlah_ooc"])
         )
 
+        # Jarak visual antara KPI dan grafik peta kendali
+        st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
+
         # Grafik peta kendali
         fig = go.Figure()
 
@@ -1196,9 +1199,10 @@ def halaman_level_sigma():
     st.markdown("<div style='height: 8px;'></div>", unsafe_allow_html=True)
     st.markdown("### Tabel Level Sigma")
     tabel_sigma = pd.DataFrame({
-        "Level Sigma": ["2 sigma", "3 sigma", "4 sigma", "5 sigma", "6 sigma"],
-        "DPMO": ["508,538", "66,807", "6,210", "233", "3,4"],
+        "Level Sigma": ["1 sigma", "2 sigma", "3 sigma", "4 sigma", "5 sigma", "6 sigma"],
+        "DPMO": ["691,462", "308,538", "66,807", "6,210", "233", "3,4"],
         "Keterangan": [
+            "Sangat tidak kompetitif",
             "Rata-rata industri Indonesia",
             "Rata-rata industri Indonesia",
             "Rata-rata industri USA",
@@ -1239,9 +1243,9 @@ def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Ba
         y_box = y_top + 0.45 if is_atas else y_top - 0.45
         fig.add_annotation(
             x=x_top, y=y_box, text=f"<b>{kat}</b>",
-            showarrow=False, bgcolor=KUNING if is_atas else HITAM,
+            showarrow=False, bgcolor=KUNING,
             bordercolor=HITAM, borderwidth=1.5, borderpad=6,
-            font=dict(family="Poppins, sans-serif", color=HITAM if is_atas else PUTIH, size=11.5)
+            font=dict(family="Poppins, sans-serif", color=HITAM, size=11.5)
         )
 
         sebab_list = data_kategori.get(kat, [])
