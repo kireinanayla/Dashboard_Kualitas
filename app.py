@@ -596,6 +596,165 @@ def get_data_aktif():
     aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy().reset_index(drop=True)
     return dasar, aktif
 
+def hitung_peta_kendali(df_input, gunakan_laney=None):
+    df = df_input.copy()
+
+    if len(df) < 2:
+        raise ValueError("Minimal diperlukan dua subgrup.")
+
+    if "Subgrup" not in df.columns:
+        df["Subgrup"] = np.arange(1, len(df) + 1)
+
+    df = df.sort_values("Subgrup").reset_index(drop=True)
+
+    if (df["Jumlah Unit Diperiksa"] <= 0).any():
+        raise ValueError("Jumlah Unit Diperiksa harus lebih besar dari 0.")
+
+    # Proporsi cacat
+    df["p_i"] = (
+        df["Jumlah Produk Cacat"] /
+        df["Jumlah Unit Diperiksa"]
+    )
+
+    # Rata-rata proporsi subgrup
+    p_bar = float(df["p_i"].mean())
+
+    if not 0 < p_bar < 1:
+        raise ValueError("Rata-rata proporsi tidak valid.")
+
+    # Standar deviasi proporsi
+    df["sigma_pi"] = np.sqrt(
+        p_bar * (1 - p_bar) /
+        df["Jumlah Unit Diperiksa"]
+    )
+
+    if (df["sigma_pi"] == 0).any():
+        raise ValueError("Simpangan baku proporsi bernilai nol.")
+
+    # Standardisasi
+    df["z_i"] = (
+        (df["p_i"] - p_bar) /
+        df["sigma_pi"]
+    )
+
+    # Moving Range dan Sigma Z
+    df["R_i"] = df["z_i"].diff().abs()
+
+    R_bar = float(df["R_i"].dropna().mean())
+    sigma_z = R_bar / 1.128
+
+    overdispersi = sigma_z > 1
+
+    # Metode ditentukan dari data awal dan dikunci selama iterasi
+    if gunakan_laney is None:
+        gunakan_laney = overdispersi
+
+    # Batas kendali P
+    df["BKA_P"] = np.minimum(
+        1,
+        p_bar + 3 * df["sigma_pi"]
+    )
+    df["BKB_P"] = np.maximum(
+        0,
+        p_bar - 3 * df["sigma_pi"]
+    )
+
+    # Batas kendali Laney P'
+    df["BKA_Laney"] = np.minimum(
+        1,
+        p_bar + 3 * sigma_z * df["sigma_pi"]
+    )
+    df["BKB_Laney"] = np.maximum(
+        0,
+        p_bar - 3 * sigma_z * df["sigma_pi"]
+    )
+
+    if gunakan_laney:
+        df["BKA_Aktif"] = df["BKA_Laney"]
+        df["BKB_Aktif"] = df["BKB_Laney"]
+        jenis = "Peta Kendali Laney P'"
+    else:
+        df["BKA_Aktif"] = df["BKA_P"]
+        df["BKB_Aktif"] = df["BKB_P"]
+        jenis = "Peta Kendali P"
+
+    df["CL"] = p_bar
+
+    df["Status_OOC"] = (
+        (df["p_i"] > df["BKA_Aktif"]) |
+        (df["p_i"] < df["BKB_Aktif"])
+    )
+
+    ringkasan = {
+        "m": len(df),
+        "p_bar": p_bar,
+        "R_bar": R_bar,
+        "sigma_z": sigma_z,
+        "is_overdispersed": overdispersi,
+        "chart_type": jenis,
+        "jumlah_ooc": int(df["Status_OOC"].sum()),
+        "jumlah_ic": int((~df["Status_OOC"]).sum())
+    }
+
+    return df, ringkasan
+
+
+def hitung_tahapan_peta_kendali(df_input):
+    dasar = df_input.copy()
+
+    if "Subgrup" not in dasar.columns:
+        dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
+
+    dasar = dasar.sort_values("Subgrup").reset_index(drop=True)
+
+    # Identifikasi metode dari data awal
+    _, hasil_awal = hitung_peta_kendali(dasar)
+    pakai_laney = hasil_awal["is_overdispersed"]
+
+    tahapan = []
+    data_aktif = dasar.copy()
+    seluruh_subgrup_dikeluarkan = []
+
+    nomor_tahap = 1
+
+    while len(data_aktif) >= 2:
+
+        df_ctrl, hasil = hitung_peta_kendali(
+            data_aktif,
+            gunakan_laney=pakai_laney
+        )
+
+        ooc = df_ctrl[df_ctrl["Status_OOC"]].copy()
+
+        tahapan.append({
+            "tahap": nomor_tahap,
+            "data": df_ctrl.copy(),
+            "ringkasan": hasil.copy(),
+            "ooc": ooc.copy(),
+            "dikeluarkan_sebelumnya":
+                seluruh_subgrup_dikeluarkan.copy()
+        })
+
+        # Berhenti jika sudah tidak ada OOC
+        if ooc.empty:
+            break
+
+        subgrup_ooc = ooc["Subgrup"].astype(int).tolist()
+
+        # Pengaman jika data tersisa kurang dari dua subgrup
+        if len(data_aktif) - len(subgrup_ooc) < 2:
+            break
+
+        seluruh_subgrup_dikeluarkan.extend(subgrup_ooc)
+
+        data_aktif = data_aktif[
+            ~data_aktif["Subgrup"].isin(subgrup_ooc)
+        ].copy().reset_index(drop=True)
+
+        nomor_tahap += 1
+
+    return tahapan, pakai_laney
+
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
