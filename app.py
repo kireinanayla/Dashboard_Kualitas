@@ -1037,10 +1037,16 @@ def halaman_peta_kendali():
                 ooc["Subgrup"].astype(str).tolist()
             )
 
-            st.warning(
-                f"<span style='font-size: 0.9rem;'><b>Tahap {tahap_ke} belum terkendali secara statistik.</b> "
-                f"Ditemukan {len(ooc)} subgrup <b>Out of Control</b>, yaitu: {daftar_ooc}.</span>",
-                icon="⚠️"
+            st.markdown(
+                f"""<div style="background-color: rgba(255, 165, 0, 0.10);
+                            border-left: 5px solid #f0a22e;
+                            border-radius: 6px;
+                            padding: 0.75rem 1rem;
+                            font-size: 0.9rem;">
+                    ⚠️ &nbsp;<b>Tahap {tahap_ke} belum terkendali secara statistik.</b>
+                    Ditemukan {len(ooc)} subgrup <b>Out of Control</b>, yaitu: {daftar_ooc}.
+                </div>""",
+                unsafe_allow_html=True
             )
 
         else:
