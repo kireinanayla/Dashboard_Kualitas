@@ -300,15 +300,15 @@ h1, h2, h3 {{ color: {HITAM}; }}
 [data-testid="stSidebar"] button,
 [data-testid="stSidebar"] button svg,
 [data-testid="collapsedControl"] button,
-[data-testid="collapsedControl"] svg {{
+[data-testid="collapsedControl"] svg {
     color: #FFFFFF !important;
     fill: #FFFFFF !important;
-}}
+}
 [data-testid="stSidebar"] button:hover,
-[data-testid="collapsedControl"] button:hover {{
+[data-testid="collapsedControl"] button:hover {
     background-color: #D71920 !important;
-}}
-</style>
+}
+\n</style>
 """, unsafe_allow_html=True)
 
 # Session State
@@ -426,9 +426,6 @@ def get_data_aktif():
     aktif = dasar.loc[~dasar["Subgrup"].isin(dikeluarkan)].copy()
     return dasar, aktif
 
-# ============================================================
-# FUNGSI PERHITUNGAN ANALISIS
-# ============================================================
 def hitung_peta_kendali(df_input, gunakan_laney=None):
     """Hitung p-chart/Laney P' dengan p-bar = rata-rata proporsi tiap subgrup."""
     df = df_input.copy()
@@ -554,7 +551,6 @@ def hitung_level_sigma(jumlah_cacat, jumlah_unit, peluang_per_unit=1, shift=1.5)
         sigma = float(norm.ppf(1 - dpmo / 1_000_000) + shift)
     return dpo, dpmo, sigma
 
-
 def halaman_beranda():
     render_header(
         judul="Six Sigma Dashboard",
@@ -632,12 +628,11 @@ def halaman_beranda():
         tampil["Tanggal"] = tampil["Tanggal"].dt.strftime("%Y-%m-%d")
         st.dataframe(tampil, use_container_width=True, hide_index=True)
 
-# ============================================================
-# HALAMAN IDENTIFIKASI OVERDISPERSI
-# ============================================================
 def halaman_overdispersi():
-    render_header(judul="Identifikasi Overdispersi",
-                  subjudul="Evaluasi Kondisi Overdispersi & Pemilihan Jenis Peta Kendali")
+    render_header(
+        judul="Identifikasi Overdispersi",
+        subjudul="Evaluasi Kondisi Overdispersi & Pemilihan Jenis Peta Kendali"
+    )
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -645,27 +640,29 @@ def halaman_overdispersi():
     try:
         hasil_df, res = hitung_peta_kendali(dasar)
     except Exception as e:
-        st.error(f"Perhitungan identifikasi overdispersi gagal: {e}")
+        st.error(str(e))
         return
+
     a, b, c, d = st.columns(4)
-    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.5f}")
-    render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.5f}")
-    render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.5f}")
+    render_kpi(a, "p̄", "icon-dark", "accent-dark", "Rata-rata Proporsi (p̄)", f"{res['p_bar']:.4f}")
+    render_kpi(b, "R̄", "icon-dark", "accent-red", "Rata-rata Moving Range (R̄)", f"{res['R_bar']:.4f}")
+    render_kpi(c, "σz", "icon-dark", "accent-yellow", "Sigma Z (R̄ / 1,128)", f"{res['sigma_z']:.4f}")
     render_kpi(d, "✓", "icon-red", "accent-yellow", "Keputusan", "Overdispersi" if res["is_overdispersed"] else "Tidak Overdispersi")
+
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if res["is_overdispersed"]:
-        st.warning(f"Nilai Sigma Z = **{res['sigma_z']:.5f} > 1**, sehingga data mengalami overdispersi. Jenis peta kendali yang digunakan adalah **{res['chart_type']}**.")
+        st.warning(f"Nilai Sigma Z = **{res['sigma_z']:.4f} > 1**, sehingga data mengalami overdispersi. Jenis peta kendali yang dipilih: **{res['chart_type']}**.")
     else:
-        st.success(f"Nilai Sigma Z = **{res['sigma_z']:.5f} ≤ 1**, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang digunakan adalah **{res['chart_type']}**.")
-    tabel = hasil_df[["Subgrup", "Tanggal", "Jumlah Unit Diperiksa", "Jumlah Produk Cacat", "p_i", "sigma_pi", "z_i", "R_i"]].copy()
+        st.success(f"Nilai Sigma Z = **{res['sigma_z']:.4f} ≤ 1**, sehingga data tidak mengalami overdispersi. Jenis peta kendali yang dipilih: **{res['chart_type']}**.")
+
+    tabel = hasil_df[[
+        "Subgrup", "Tanggal", "Jumlah Unit Diperiksa",
+        "Jumlah Produk Cacat", "p_i", "sigma_pi", "z_i", "R_i"
+    ]].copy()
     tabel["Tanggal"] = pd.to_datetime(tabel["Tanggal"]).dt.strftime("%Y-%m-%d")
     st.markdown("### Tabel Perhitungan")
     st.dataframe(tabel, use_container_width=True, hide_index=True)
 
-
-# ============================================================
-# HALAMAN PETA KENDALI - TAHAP OTOMATIS
-# ============================================================
 def halaman_peta_kendali():
     render_header(judul="Analisis Peta Kendali",
                   subjudul="Pemantauan & Revisi Bertahap Hingga Seluruh Subgrup In Control")
@@ -719,13 +716,11 @@ def halaman_peta_kendali():
             ooc_tampil["Tanggal"] = pd.to_datetime(ooc_tampil["Tanggal"]).dt.strftime("%Y-%m-%d")
             st.dataframe(ooc_tampil, use_container_width=True, hide_index=True)
 
-
-# ============================================================
-# HALAMAN RUNS TEST
-# ============================================================
 def halaman_runs_test():
-    render_header(judul="Uji Keacakan (Runs Test)",
-                  subjudul="Pengujian Pola Acak Proporsi Cacat Produksi")
+    render_header(
+        judul="Uji Keacakan (Runs Test)",
+        subjudul="Pengujian Pola Acak Proporsi Cacat Produksi"
+    )
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
@@ -734,47 +729,49 @@ def halaman_runs_test():
         df_ctrl, _ = hitung_peta_kendali(aktif)
         rt = hitung_runs_test(df_ctrl["p_i"])
     except Exception as e:
-        st.error(f"Perhitungan Runs Test gagal: {e}")
+        st.error(str(e))
         return
+
     alpha = st.number_input("Taraf signifikansi (α)", min_value=0.01, max_value=0.10, value=0.05, step=0.01)
     a, b, c, d = st.columns(4)
     render_kpi(a, "M", "icon-dark", "accent-dark", "Median Proporsi", f"{rt['median']:.5f}")
     render_kpi(b, "V", "icon-dark", "accent-yellow", "Jumlah Runs (V)", str(rt["V"]))
     render_kpi(c, "Z", "icon-dark", "accent-yellow", "Statistik Uji Z", f"{rt['Z']:.4f}")
     render_kpi(d, "P", "icon-red", "accent-red", "P-value", f"{rt['p_value']:.4f}")
+
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
         st.error("Keputusan: Tolak H₀. Data tidak menyebar secara acak.")
     else:
         st.success("Keputusan: Gagal menolak H₀. Tidak terdapat bukti bahwa data menyebar tidak acak.")
+
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=BIRU)))
     fig.add_hline(y=rt["median"], line_dash="dash", line_color=KUNING, annotation_text=f"Median = {rt['median']:.5f}")
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
 
-
-# ============================================================
-# HALAMAN KAPABILITAS P%pk
-# ============================================================
 def halaman_kapabilitas():
-    render_header(judul="Indeks Kapabilitas Proses",
-                  subjudul="Pengukuran Kapabilitas Data Atribut (P%pk)")
+    render_header(
+        judul="Indeks Kapabilitas Proses",
+        subjudul="Pengukuran Kapabilitas Data Atribut (P%pk)"
+    )
     dasar, aktif = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
     try:
-        # Mengikuti data aktif yang ditampilkan pada dashboard; p-bar adalah mean p_i.
         _, res = hitung_peta_kendali(aktif)
         z_p, ppk = hitung_ppk_persen(res["p_bar"])
     except Exception as e:
-        st.error(f"Perhitungan P%pk gagal: {e}")
+        st.error(str(e))
         return
+
     a, b, c = st.columns(3)
     render_kpi(a, "p̄", "icon-dark", "accent-dark", "Proporsi Cacat (p̄)", f"{res['p_bar']:.5f}")
     render_kpi(b, "Z", "icon-dark", "accent-yellow", "Nilai Normal Z(p̄)", f"{z_p:.5f}")
     render_kpi(c, "C", "icon-red", "accent-red", "P%pk", f"{ppk:.5f}")
+
     st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
     st.latex(r"P\%_{pk} = \frac{Z(\bar{p})}{3}")
     if ppk >= 1:
@@ -782,34 +779,36 @@ def halaman_kapabilitas():
     else:
         st.error("Interpretasi berdasarkan batas P%pk < 1: proses belum kapabel.")
 
-
-# ============================================================
-# HALAMAN LEVEL SIGMA
-# ============================================================
 def halaman_level_sigma():
-    render_header(judul="Level Sigma",
-                  subjudul="Perhitungan DPO, DPMO, dan Nilai Sigma Proses Produksi")
+    render_header(
+        judul="Level Sigma",
+        subjudul="Perhitungan DPO, DPMO, dan Nilai Sigma Proses Produksi"
+    )
     dasar, _ = get_data_aktif()
     if dasar is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
+
+    # Menggunakan seluruh data produksi awal (Fase I) sesuai perhitungan di Excel
     total_cacat = int(dasar["Jumlah Produk Cacat"].sum())
     total_unit = int(dasar["Jumlah Unit Diperiksa"].sum())
+
     try:
         dpo, dpmo, sigma = hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5)
     except Exception as e:
-        st.error(f"Perhitungan Level Sigma gagal: {e}")
+        st.error(str(e))
         return
+
     a, b, c, d = st.columns(4)
     render_kpi(a, "❗", "icon-red", "accent-red", "Total Produk Cacat", format_angka(total_cacat))
     render_kpi(b, "D", "icon-dark", "accent-dark", "DPO", f"{dpo:.5f}")
     render_kpi(c, "M", "icon-dark", "accent-yellow", "DPMO", f"{dpmo:,.2f}")
     render_kpi(d, "Σ", "icon-red", "accent-yellow", "Level Sigma", f"{sigma:.4f}" if np.isfinite(sigma) else "∞")
+
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
     st.latex(r"DPMO = DPO \times 10^6")
     st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
-
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
