@@ -1,96 +1,106 @@
-import io
-import numpy as np
-import pandas as pd
-import streamlit as st
-import plotly.express as px
-import plotly.graph_objects as go
-from scipy.stats import norm
+        for baris in teks.split("\n"):
+            if baris.strip():
+                daftar_fishbone.append({
+                    "Kategori (5M + 1E)": kat.split(" ")[0],
+                    "Failure Mode / Penyebab Kegagalan": baris.strip()
+                })
 
-st.set_page_config(
-    page_title="Six Sigma Dashboard - PT XYZ",
-    page_icon="📊",
-    layout="wide",
-    initial_sidebar_state="expanded"
-)
+    if not daftar_fishbone:
+        st.warning("Belum ada data penyebab dari halaman **Diagram Sebab-Akibat (Fishbone)**. Silakan isi penyebab kecacatan pada menu Diagram Sebab-Akibat terlebih dahulu agar otomatis muncul di tabel ini.")
+        return
 
-# Palet Warna Sesuai Desain Referensi PT XYZ
-MERAH = "#D71920"
-KUNING = "#F5C518"
-HITAM = "#1A1C20"
-PUTIH = "#FFFFFF"
-BIRU = "#2563EB"
-ABU_BG = "#FFFFFF"
-ABU_TEKS = "#1A1C20"
+    df_base = pd.DataFrame(daftar_fishbone)
 
-st.markdown("""
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
-""", unsafe_allow_html=True)
+    if not st.session_state.fmea_scores.empty and "Failure Mode / Penyebab Kegagalan" in st.session_state.fmea_scores.columns:
+        df_merged = pd.merge(
+            df_base,
+            st.session_state.fmea_scores[["Failure Mode / Penyebab Kegagalan", "Dampak Kegagalan", "Severity", "Occurrence", "Usulan Perbaikan"]],
+            on="Failure Mode / Penyebab Kegagalan",
+            how="left"
+        )
+    else:
+        df_merged = df_base.copy()
+        df_merged["Dampak Kegagalan"] = ""
+        df_merged["Severity"] = 1
+        df_merged["Occurrence"] = 1
+        df_merged["Usulan Perbaikan"] = ""
 
-st.markdown(f"""
-<style>
-html, body, [class*="css"], [data-testid="stAppViewContainer"], [data-testid="stSidebar"] {{
-    font-family: 'Poppins', sans-serif !important;
-}}
-.stApp {{
-    background-color: {ABU_BG};
-    color: {HITAM};
-}}
-.block-container {{
-    padding-top: 0.65rem;
-    padding-bottom: 1.25rem;
-    max-width: 1380px;
-}}
+    df_merged["Dampak Kegagalan"] = df_merged["Dampak Kegagalan"].fillna("")
+    df_merged["Severity"] = df_merged["Severity"].fillna(1).astype(int)
+    df_merged["Occurrence"] = df_merged["Occurrence"].fillna(1).astype(int)
+    df_merged["Usulan Perbaikan"] = df_merged["Usulan Perbaikan"].fillna("")
+    df_merged["RPN (S × O)"] = df_merged["Severity"] * df_merged["Occurrence"]
+    df_merged["Keterangan Prioritas"] = df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
 
-/* Sidebar dengan Header Putih & Body Gelap */
-[data-testid="stSidebar"] {{
-    background: {HITAM};
-    border-right: 1px solid #E5E7EB;
-}}
-[data-testid="stSidebar"] > div:first-child {{
-    padding-top: 0.7rem;
-}}
+    st.markdown("### Input Skor Severity & Occurrence")
+    edited_fmea = st.data_editor(
+        df_merged,
+        use_container_width=True,
+        hide_index=True,
+        column_config={
+            "Kategori (5M + 1E)": st.column_config.TextColumn("Kategori (5M + 1E)", disabled=True),
+            "Failure Mode / Penyebab Kegagalan": st.column_config.TextColumn("Failure Mode / Penyebab Kegagalan", disabled=True),
+            "Dampak Kegagalan": st.column_config.TextColumn("Dampak Kegagalan (Opsional)"),
+            "Severity": st.column_config.NumberColumn("Severity (1–10)", min_value=1, max_value=10, step=1, required=True),
+            "Occurrence": st.column_config.NumberColumn("Occurrence (1–10)", min_value=1, max_value=10, step=1, required=True),
+            "RPN (S × O)": st.column_config.NumberColumn("RPN (S × O)", disabled=True),
+            "Keterangan Prioritas": st.column_config.TextColumn("Keterangan Prioritas", disabled=True),
+            "Usulan Perbaikan": st.column_config.TextColumn("Usulan Perbaikan")
+        },
+        key="editor_fmea_otomatis"
+    )
 
-/* Logo Box di Sidebar */
-.sidebar-logo {{
-    text-align: center;
-    padding: 8px 10px 14px 10px;
-    margin-bottom: 8px;
-}}
-.logo-bars {{
-    display: inline-flex;
-    gap: 5px;
-    margin-bottom: 4px;
-}}
-.bar-red {{ width: 14px; height: 26px; background: {MERAH}; transform: skewX(-22deg); border-radius: 2px; }}
- .bar-orange {{ width: 14px; height: 26px; background: {MERAH}; transform: skewX(-22deg); border-radius: 2px; }}
-.bar-yellow {{ width: 14px; height: 26px; background: {KUNING}; transform: skewX(-22deg); border-radius: 2px; }}
-.logo-title {{
-    font-size: 22px;
-    font-weight: 900;
-    color: {HITAM} !important;
-    letter-spacing: 0.5px;
-    line-height: 1.1;
-}}
-.logo-sub {{
-    font-size: 10.5px;
-    font-weight: 600;
-    color: {ABU_TEKS} !important;
-}}
+    if st.button("⚡ Hitung Nilai RPN & Urutkan Prioritas", use_container_width=True):
+        hasil = edited_fmea.copy()
+        hasil["RPN (S × O)"] = hasil["Severity"].astype(int) * hasil["Occurrence"].astype(int)
+        hasil["Keterangan Prioritas"] = hasil["RPN (S × O)"].apply(kategori_prioritas_rpn)
+        st.session_state.fmea_scores = hasil
+        st.rerun()
 
-/* Menu Radio di Sidebar */
-[data-testid="stSidebar"] .stRadio > label {{
-    display: none;
-}}
-[data-testid="stSidebar"] div[role="radiogroup"] {{
-    gap: 6px;
-    padding: 0 8px;
-}}
-[data-testid="stSidebar"] div[role="radiogroup"] label {{
-    background-color: transparent;
-    border-radius: 10px;
-    padding: 10px 14px;
-    transition: all 0.2s ease;
-    border: 1px solid transparent;
-}}
+    hasil_akhir = edited_fmea.copy()
+    hasil_akhir["RPN (S × O)"] = hasil_akhir["Severity"].astype(int) * hasil_akhir["Occurrence"].astype(int)
+    hasil_akhir["Keterangan Prioritas"] = hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    hasil_akhir = hasil_akhir.sort_values("RPN (S × O)", ascending=False).reset_index(drop=True)
+    hasil_akhir.insert(0, "Peringkat", np.arange(1, len(hasil_akhir) + 1))
+
+    st.markdown("---")
+    st.markdown("### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)")
+    st.dataframe(hasil_akhir, use_container_width=True, hide_index=True)
+
+    out_fmea = io.BytesIO()
+    with pd.ExcelWriter(out_fmea, engine="openpyxl") as writer:
+        hasil_akhir.to_excel(writer, index=False, sheet_name="Hasil_FMEA")
+    st.download_button(
+        "⬇️ Download Tabel Hasil FMEA (.xlsx)",
+        data=out_fmea.getvalue(),
+        file_name="Hasil_Analisis_FMEA_PT_XYZ.xlsx",
+        mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
+    )
+
+MENU_ITEMS = {
+    "🏠  Beranda (Input Data)": halaman_beranda,
+    "📊  Identifikasi Overdispersi": halaman_overdispersi,
+    "📈  Peta Kendali": halaman_peta_kendali,
+    "🔀  Uji Keacakan (Runs Test)": halaman_runs_test,
+    "⏱️  Indeks Kapabilitas Proses": halaman_kapabilitas,
+    "Σ   Level Sigma": halaman_level_sigma,
+    "🐟  Diagram Sebab-Akibat": halaman_fishbone,
+    "📋  FMEA": halaman_fmea
+}
+
+with st.sidebar:
+    st.markdown("""
+    <div class="sidebar-logo">
+        <div class="logo-bars">
+            <div class="bar-red"></div>
+            <div class="bar-yellow"></div>
+        </div>
+        <div class="logo-title">PT XYZ</div>
+        <div class="logo-sub">Building a Better Future</div>
+    </div>
+    """, unsafe_allow_html=True)
+
+    pilihan_menu = st.radio("Navigasi", list(MENU_ITEMS.keys()), index=0)
+
+
+MENU_ITEMS[pilihan_menu]()
