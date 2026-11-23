@@ -967,7 +967,7 @@ def halaman_peta_kendali():
         )
 
         render_kpi(
-            c, "⚠", "Jumlah Subgrup OOC", str(res["jumlah_ooc"])
+            c, "⚠", "Jumlah Subgrup Out of Control", str(res["jumlah_ooc"])
         )
 
         # Grafik peta kendali
@@ -1038,8 +1038,9 @@ def halaman_peta_kendali():
             )
 
             st.warning(
-                f"**Tahap {tahap_ke} belum terkendali secara statistik.** "
-                f"Ditemukan {len(ooc)} subgrup OOC, yaitu: {daftar_ooc}."
+                f"<span style='font-size: 0.9rem;'><b>Tahap {tahap_ke} belum terkendali secara statistik.</b> "
+                f"Ditemukan {len(ooc)} subgrup <b>Out of Control</b>, yaitu: {daftar_ooc}.</span>",
+                icon="⚠️"
             )
 
         else:
@@ -1064,7 +1065,7 @@ def halaman_peta_kendali():
         st.error(
             f"Proses belum terkendali sampai tahap terakhir "
             f"yang dapat dihitung. Masih terdapat "
-            f"{len(ooc_akhir)} subgrup OOC."
+            f"{len(ooc_akhir)} subgrup Out of Control."
         )
 
 def halaman_runs_test():
