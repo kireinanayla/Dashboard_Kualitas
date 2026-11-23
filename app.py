@@ -814,16 +814,34 @@ def hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5):
     return float(dpo), float(dpmo), sigma
 
 
+
 def get_data_final_in_control():
-    """Ambil subgrup tersisa setelah iterasi otomatis peta kendali."""
+    """Mengambil data akhir yang seluruh subgrupnya sudah In Control."""
     if st.session_state.df_produksi is None:
         return None
+
     dasar = st.session_state.df_produksi.copy()
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
+
+    if len(dasar) < 2:
+        raise ValueError("Minimal diperlukan dua subgrup untuk analisis peta kendali.")
+
     tahapan, _ = hitung_tahapan_peta_kendali(dasar)
+
     if not tahapan:
-        return dasar
-    return tahapan[-1]["data"].copy()
+        raise ValueError("Tidak terdapat tahapan peta kendali yang dapat dihitung.")
+
+    tahap_akhir = tahapan[-1]
+
+    # Pastikan seluruh subgrup pada tahap terakhir sudah In Control
+    if not tahap_akhir["ooc"].empty:
+        raise ValueError(
+            "Proses belum mencapai kondisi In Control. "
+            "Masih terdapat subgrup Out of Control pada tahap terakhir."
+        )
+
+    return tahap_akhir["data"].copy()
+
 
 
 def halaman_beranda():
@@ -1110,32 +1128,65 @@ def halaman_runs_test():
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
 
+
 def halaman_kapabilitas():
     render_header(judul="Indeks Kapabilitas Proses")
-    dasar, _ = get_data_aktif()
-    if dasar is None:
+
+    if st.session_state.df_produksi is None:
         st.warning("Unggah data terlebih dahulu melalui halaman Beranda.")
         return
+
     try:
-        _, res = hitung_peta_kendali(dasar)
-        z_p, ppk = hitung_ppk_persen(res["p_bar"])
+        # Mengambil data yang sudah In Control dari iterasi peta kendali
+        df_final = get_data_final_in_control()
+
+        # Menghitung proporsi cacat berdasarkan data In Control
+        total_cacat = df_final["Jumlah Produk Cacat"].sum()
+        total_unit = df_final["Jumlah Unit Diperiksa"].sum()
+
+        p_bar = total_cacat / total_unit
+
+        # Menghitung nilai Z dan P%pk
+        z_p, ppk = hitung_ppk_persen(p_bar)
+
     except Exception as e:
         st.error(str(e))
         return
 
-    a, b, c = st.columns(3)
-    render_kpi(a, "p̄", "Proporsi Cacat (p̄)", f"{res['p_bar']:.5f}")
-    render_kpi(b, "Z", "Nilai Normal Z(p̄)", f"{z_p:.5f}")
-    render_kpi(c, "C", "P%pk", f"{ppk:.5f}")
+    st.caption(
+        f"Perhitungan menggunakan {len(df_final)} subgrup "
+        "yang telah berada dalam kondisi In Control."
+    )
 
-    st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
+    a, b, c = st.columns(3)
+
+    render_kpi(
+        a, "p̄", "Proporsi Cacat (p̄)", f"{p_bar:.5f}"
+    )
+
+    render_kpi(
+        b, "Z", "Nilai Normal Z(p̄)", f"{z_p:.5f}"
+    )
+
+    render_kpi(
+        c, "C", "P%pk", f"{ppk:.5f}"
+    )
+
+    st.markdown(
+        "<div style='height: 16px;'></div>",
+        unsafe_allow_html=True
+    )
+
     ppk_str = format_koma(ppk, 3)
     z_str = format_koma(z_p, 3)
+
     if ppk >= 1:
         st.markdown(
             f'<div class="interp-box interp-yellow">'
             f'<b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b><br>'
-            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} menunjukkan bahwa proses sudah kapabel, sehingga kinerja proses perlu terus dipertahankan.'
+            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} '
+            f'menunjukkan bahwa proses sudah kapabel, sehingga '
+            f'kinerja proses perlu terus dipertahankan.'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -1143,10 +1194,14 @@ def halaman_kapabilitas():
         st.markdown(
             f'<div class="interp-box interp-red">'
             f'<b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b><br>'
-            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} menunjukkan bahwa proses belum kapabel, sehingga diperlukan perbaikan untuk menurunkan proporsi cacat dan meningkatkan kapabilitas proses.'
+            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} '
+            f'menunjukkan bahwa proses belum kapabel, sehingga '
+            f'diperlukan perbaikan untuk menurunkan proporsi cacat '
+            f'dan meningkatkan kapabilitas proses.'
             f'</div>',
             unsafe_allow_html=True
         )
+
 
 def halaman_level_sigma():
     render_header(judul="Level Sigma")
