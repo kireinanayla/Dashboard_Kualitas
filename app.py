@@ -300,14 +300,14 @@ h1, h2, h3 {{ color: {HITAM}; }}
 [data-testid="stSidebar"] button,
 [data-testid="stSidebar"] button svg,
 [data-testid="collapsedControl"] button,
-[data-testid="collapsedControl"] svg {
+[data-testid="collapsedControl"] svg {{
     color: #FFFFFF !important;
     fill: #FFFFFF !important;
-}
+}}
 [data-testid="stSidebar"] button:hover,
-[data-testid="collapsedControl"] button:hover {
+[data-testid="collapsedControl"] button:hover {{
     background-color: #D71920 !important;
-}
+}}
 \n</style>
 """, unsafe_allow_html=True)
 
@@ -331,7 +331,6 @@ if "fishbone_generated" not in st.session_state:
     st.session_state.fishbone_generated = False
 if "fmea_scores" not in st.session_state:
     st.session_state.fmea_scores = pd.DataFrame()
-
 
 def render_header(judul="Six Sigma Dashboard", subjudul="Analisis Kualitas Produksi Bata Ringan AAC – PT XYZ"):
     df = st.session_state.df_produksi
@@ -764,7 +763,6 @@ def halaman_beranda():
         tampil["Tanggal"] = tampil["Tanggal"].dt.strftime("%Y-%m-%d")
         st.dataframe(tampil, use_container_width=True, hide_index=True)
 
-
 def halaman_overdispersi():
     render_header(
         judul="Identifikasi Overdispersi",
@@ -799,7 +797,6 @@ def halaman_overdispersi():
     tabel["Tanggal"] = pd.to_datetime(tabel["Tanggal"]).dt.strftime("%Y-%m-%d")
     st.markdown("### Tabel Perhitungan")
     st.dataframe(tabel, use_container_width=True, hide_index=True)
-
 
 def halaman_peta_kendali():
     render_header(
@@ -964,7 +961,6 @@ def halaman_runs_test():
     fig.update_layout(title="Proporsi Cacat terhadap Median", xaxis_title="Subgrup", yaxis_title="Proporsi cacat")
     st.plotly_chart(style_plotly(fig), use_container_width=True)
 
-
 def halaman_kapabilitas():
     render_header(
         judul="Indeks Kapabilitas Proses",
@@ -992,7 +988,6 @@ def halaman_kapabilitas():
         st.success("Interpretasi berdasarkan batas P%pk ≥ 1: proses kapabel.")
     else:
         st.error("Interpretasi berdasarkan batas P%pk < 1: proses belum kapabel.")
-
 
 def halaman_level_sigma():
     render_header(
@@ -1024,7 +1019,6 @@ def halaman_level_sigma():
     st.latex(r"DPO = \frac{\text{Jumlah cacat}}{\text{Unit diperiksa} \times \text{Peluang per unit}}")
     st.latex(r"DPMO = DPO \times 10^6")
     st.latex(r"\text{Level Sigma} = \Phi^{-1}\left(1-\frac{DPMO}{10^6}\right)+1{,}5")
-
 
 def buat_gambar_fishbone(data_kategori, masalah_utama="Tingginya Produk Cacat Bata Ringan AAC"):
     fig = go.Figure()
@@ -1140,7 +1134,6 @@ def halaman_fishbone():
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=masalah_utama)
         st.plotly_chart(fig_fb, use_container_width=True)
 
-
 def kategori_prioritas_rpn(rpn):
     if pd.isna(rpn):
         return "-"
@@ -1252,7 +1245,6 @@ def halaman_fmea():
         file_name="Hasil_Analisis_FMEA_PT_XYZ.xlsx",
         mime="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
     )
-
 
 MENU_ITEMS = {
     "🏠  Beranda (Input Data)": halaman_beranda,
