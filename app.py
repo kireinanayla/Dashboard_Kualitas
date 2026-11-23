@@ -948,7 +948,6 @@ def halaman_peta_kendali():
         ooc = hasil_tahap["ooc"]
         dikeluarkan = hasil_tahap["dikeluarkan_sebelumnya"]
 
-        st.markdown("---")
         st.markdown(f"## Peta Kendali — Tahap {tahap_ke}")
 
         if dikeluarkan:
