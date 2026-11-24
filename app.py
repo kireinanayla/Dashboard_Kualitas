@@ -1109,11 +1109,22 @@ def halaman_runs_test():
         st.error(str(e))
         return
 
-   st.markdown("""
-### Hipotesis
-H<sub>0</sub> : Proporsi produk cacat menyebar secara acak  
-H<sub>1</sub> : Proporsi produk cacat tidak menyebar secara acak
-""", unsafe_allow_html=True)
+    st.markdown(
+        """
+        <div style="margin: 0 0 14px 0; line-height: 1.35;">
+            <div style="font-size: 1.15rem; font-weight: 600; margin-bottom: 6px;">
+                Hipotesis
+            </div>
+            <p style="margin: 0 0 3px 0;">
+                H<sub>0</sub> : Proporsi produk cacat menyebar secara acak
+            </p>
+            <p style="margin: 0;">
+                H<sub>1</sub> : Proporsi produk cacat tidak menyebar secara acak
+            </p>
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
 
     alpha = 0.05
     a, b, c, d = st.columns(4)
