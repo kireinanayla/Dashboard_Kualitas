@@ -1109,6 +1109,16 @@ def halaman_runs_test():
         st.error(str(e))
         return
 
+    st.markdown(
+        """
+        ### Hipotesis
+        H<sub>0</sub> : Proporsi produk cacat menyebar secara acak
+
+        H<sub>1</sub> : Proporsi produk cacat tidak menyebar secara acak
+        """,
+        unsafe_allow_html=True
+    )
+
     alpha = 0.05
     a, b, c, d = st.columns(4)
     render_kpi(a, "M", "Median Proporsi", f"{rt['median']:.5f}")
@@ -1152,11 +1162,6 @@ def halaman_kapabilitas():
     except Exception as e:
         st.error(str(e))
         return
-
-    st.caption(
-        f"Perhitungan menggunakan {len(df_final)} subgrup "
-        "yang telah berada dalam kondisi In Control."
-    )
 
     a, b, c = st.columns(3)
 
