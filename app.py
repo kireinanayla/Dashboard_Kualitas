@@ -1135,9 +1135,21 @@ def halaman_runs_test():
 
     st.markdown("<div style='height: 16px;'></div>", unsafe_allow_html=True)
     if rt["p_value"] < alpha:
-        st.markdown('<div class="interp-box interp-red"><b>Keputusan: Tolak H₀.</b> Data tidak menyebar secara acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="interp-box interp-red">'
+            '<b>Keputusan: Tolak H₀.</b> Proporsi produk cacat tidak menyebar secara acak '
+            '(taraf signifikansi α = 0,05).'
+            '</div>',
+            unsafe_allow_html=True
+        )
     else:
-        st.markdown('<div class="interp-box interp-yellow"><b>Keputusan: Gagal menolak H₀.</b> Tidak terdapat bukti bahwa data menyebar tidak acak (taraf signifikansi α = 0,05).</div>', unsafe_allow_html=True)
+        st.markdown(
+            '<div class="interp-box interp-yellow">'
+            '<b>Keputusan: Gagal menolak H₀.</b> Proporsi produk cacat menyebar secara acak '
+            '(taraf signifikansi α = 0,05).'
+            '</div>',
+            unsafe_allow_html=True
+        )
 
     fig = go.Figure()
     fig.add_trace(go.Scatter(x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers", name="Proporsi cacat", line=dict(color=MERAH), marker=dict(color=HITAM)))
@@ -1190,26 +1202,20 @@ def halaman_kapabilitas():
     )
 
     ppk_str = format_koma(ppk, 3)
-    z_str = format_koma(z_p, 3)
 
     if ppk >= 1:
         st.markdown(
             f'<div class="interp-box interp-yellow">'
-            f'<b>Interpretasi berdasarkan batas P%pk &ge; 1: proses kapabel.</b><br>'
-            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} '
-            f'menunjukkan bahwa proses sudah kapabel, sehingga '
-            f'kinerja proses perlu terus dipertahankan.'
+            f'Nilai P%pk sebesar {ppk_str} yang sama dengan atau lebih dari 1 '
+            f'menunjukkan bahwa proses produksi sudah kapabel.'
             f'</div>',
             unsafe_allow_html=True
         )
     else:
         st.markdown(
             f'<div class="interp-box interp-red">'
-            f'<b>Interpretasi berdasarkan batas P%pk &lt; 1: proses belum kapabel.</b><br>'
-            f'Nilai P%pk sebesar {ppk_str} dan Z sebesar {z_str} '
-            f'menunjukkan bahwa proses belum kapabel, sehingga '
-            f'diperlukan perbaikan untuk menurunkan proporsi cacat '
-            f'dan meningkatkan kapabilitas proses.'
+            f'Nilai P%pk sebesar {ppk_str} yang kurang dari 1 '
+            f'menunjukkan bahwa proses produksi belum kapabel.'
             f'</div>',
             unsafe_allow_html=True
         )
@@ -1257,8 +1263,8 @@ def halaman_level_sigma():
         st.markdown(
             f'<div class="interp-box interp-red">'
             f'Hasil perhitungan menunjukkan nilai DPMO sebesar {dpmo_str} dengan level sigma {sigma_str}. '
-            f'Artinya, dari satu juta peluang terdapat sekitar {peluang_bulat} peluang terjadinya cacat. '
-            f'Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ), sehingga perlu dilakukan perbaikan untuk menurunkan jumlah cacat dan meningkatkan level sigma.'
+            f'Artinya, dari satu juta peluang terdapat sekitar {peluang_bulat} kejadian cacat. '
+            f'Nilai ini menunjukkan bahwa proses produksi masih berada di bawah target Six Sigma (6σ).'
             f'</div>',
             unsafe_allow_html=True
         )
