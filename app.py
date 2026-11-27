@@ -1437,15 +1437,39 @@ def halaman_fishbone():
         fig_fb = buat_gambar_fishbone(data_parsed, masalah_utama=st.session_state.fishbone_problem)
         st.plotly_chart(fig_fb, use_container_width=True)
 
-def kategori_prioritas_rpn(rpn):
-    if pd.isna(rpn):
+def kategori_prioritas_matriks(severity, occurrence):
+    """Menentukan Grade risiko berdasarkan matriks risiko perusahaan.
+
+    Severity: 1=Low, 2=Medium, 3=High, 4=Extreme, 5=Disaster.
+    Occurrence/Likelihood: 1=Low, 2=Medium, 3=High, 4=Extreme.
+    """
+    if pd.isna(severity) or pd.isna(occurrence):
         return "-"
-    if rpn >= 12:
-        return "Prioritas Tinggi (Segera Diperbaiki)"
-    elif rpn >= 6:
-        return "Prioritas Sedang (Perlu Pengendalian)"
-    else:
-        return "Prioritas Rendah (Pemantauan Rutin)"
+
+    severity = int(severity)
+    occurrence = int(occurrence)
+
+    matriks_grade = {
+        1: {1: "L (Low)", 2: "L (Low)", 3: "M (Medium)", 4: "M (Medium)"},
+        2: {1: "M (Medium)", 2: "M (Medium)", 3: "H (High)", 4: "H (High)"},
+        3: {1: "H (High)", 2: "H (High)", 3: "E (Extreme)", 4: "E (Extreme)"},
+        4: {1: "E (Extreme)", 2: "E (Extreme)", 3: "E (Extreme)", 4: "E (Extreme)"},
+        5: {1: "D (Disaster)", 2: "D (Disaster)", 3: "D (Disaster)", 4: "D (Disaster)"},
+    }
+
+    return matriks_grade.get(severity, {}).get(occurrence, "-")
+
+
+def urutan_grade_risiko(grade):
+    """Urutan grade risiko: Disaster, Extreme, High, Medium, Low."""
+    urutan = {
+        "D (Disaster)": 1,
+        "E (Extreme)": 2,
+        "H (High)": 3,
+        "M (Medium)": 4,
+        "L (Low)": 5,
+    }
+    return urutan.get(grade, 99)
 
 
 def generate_usulan_perbaikan(failure_mode, dampak, penyebab=""):
@@ -1599,7 +1623,9 @@ def halaman_fmea():
         '&nbsp;&nbsp;&nbsp;3. <b>High (3):</b> Terjadi 4–6 kali dalam 6 bulan.<br>'
         '&nbsp;&nbsp;&nbsp;4. <b>Extreme (4):</b> Terjadi &gt; 6 kali dalam 6 bulan.<br>'
         '• <b>Cara Membaca Nilai RPN (Risk Priority Number = Severity × Occurrence, rentang 1–20):</b><br>'
-        '&nbsp;&nbsp;&nbsp;Penentuan prioritas dilakukan berdasarkan <b>peringkat nilai RPN tertinggi</b>. Semakin tinggi nilai RPN suatu penyebab kegagalan, maka penyebab tersebut memiliki tingkat risiko paling kritis dan <b>harus paling cepat segera diperbaiki</b>.'
+        '&nbsp;&nbsp;&nbsp;Nilai RPN tetap dihitung dari perkalian Severity dan Occurrence sebagai informasi pendukung penilaian risiko.<br>'
+        '• <b>Penentuan Keterangan Prioritas:</b><br>'
+        '&nbsp;&nbsp;&nbsp;Keterangan prioritas ditentukan berdasarkan <b>matriks risiko perusahaan</b>, yaitu kombinasi kategori Severity dan Likelihood (Occurrence), sehingga menghasilkan Grade Low (L), Medium (M), High (H), Extreme (E), atau Disaster (D). Penyebab kegagalan diurutkan berdasarkan Grade tertinggi. Apabila terdapat Grade yang sama, nilai RPN tertinggi digunakan sebagai urutan berikutnya.'
         '</div></div>'
     )
 
@@ -1676,8 +1702,11 @@ def halaman_fmea():
         df_merged["Severity"] * df_merged["Occurrence"]
     )
 
-    df_merged["Keterangan Prioritas"] = (
-        df_merged["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    df_merged["Keterangan Prioritas"] = df_merged.apply(
+        lambda row: kategori_prioritas_matriks(
+            row["Severity"], row["Occurrence"]
+        ),
+        axis=1
     )
 
     st.markdown("### Input Skor Severity & Occurrence")
@@ -1736,8 +1765,11 @@ def halaman_fmea():
         hasil_akhir["Severity"] * hasil_akhir["Occurrence"]
     )
 
-    hasil_akhir["Keterangan Prioritas"] = (
-        hasil_akhir["RPN (S × O)"].apply(kategori_prioritas_rpn)
+    hasil_akhir["Keterangan Prioritas"] = hasil_akhir.apply(
+        lambda row: kategori_prioritas_matriks(
+            row["Severity"], row["Occurrence"]
+        ),
+        axis=1
     )
 
     if st.button(
@@ -1747,17 +1779,23 @@ def halaman_fmea():
         st.session_state.fmea_scores = hasil_akhir.copy()
         st.rerun()
 
-    # Mengurutkan berdasarkan RPN tertinggi
+    # Mengurutkan berdasarkan Grade matriks risiko, lalu RPN tertinggi.
+    hasil_akhir["_Urutan Grade"] = hasil_akhir["Keterangan Prioritas"].apply(
+        urutan_grade_risiko
+    )
     hasil_akhir = hasil_akhir.sort_values(
-        "RPN (S × O)",
-        ascending=False
+        ["_Urutan Grade", "RPN (S × O)"],
+        ascending=[True, False],
+        kind="stable"
     ).reset_index(drop=True)
 
+    # Penyebab dengan Grade dan RPN yang sama memperoleh peringkat yang sama.
     hasil_akhir.insert(
         0,
         "Peringkat",
-        np.arange(1, len(hasil_akhir) + 1)
+        hasil_akhir.groupby(["_Urutan Grade", "RPN (S × O)"], sort=False).ngroup() + 1
     )
+    hasil_akhir = hasil_akhir.drop(columns=["_Urutan Grade"])
 
     st.markdown(
         "<div style='height: 14px;'></div>",
@@ -1765,7 +1803,7 @@ def halaman_fmea():
     )
 
     st.markdown(
-        "### Hasil Prioritas Perbaikan (Diurutkan dari RPN Tertinggi)"
+        "### Hasil Prioritas Perbaikan (Diurutkan berdasarkan Grade Risiko dan RPN)"
     )
 
     st.dataframe(
