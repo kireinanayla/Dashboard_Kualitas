@@ -484,6 +484,8 @@ if "riwayat_iterasi" not in st.session_state:
     st.session_state.riwayat_iterasi = []
 if "excluded_subgroups" not in st.session_state:
     st.session_state.excluded_subgroups = []
+if "peta_kendali_keputusan" not in st.session_state:
+    st.session_state.peta_kendali_keputusan = {}
 if "fishbone_inputs" not in st.session_state:
     st.session_state.fishbone_inputs = {
         "Man (Manusia)": "",
@@ -699,58 +701,55 @@ def hitung_peta_kendali(df_input, gunakan_laney=None):
     return df, ringkasan
 
 
-def hitung_tahapan_peta_kendali(df_input):
-    dasar = df_input.copy()
+def hitung_tahapan_peta_kendali(df_input, keputusan=None):
+    """Membentuk tahapan peta kendali hanya dengan mengeluarkan subgrup
+    yang telah dievaluasi sebagai Assignable Causes.
 
+    keputusan berbentuk {nomor_tahap: [daftar_subgrup_assignable_cause]}.
+    Tahap berhenti jika belum dievaluasi, tidak ada Assignable Causes,
+    atau jumlah data tersisa tidak cukup untuk menghitung moving range.
+    """
+    dasar = df_input.copy()
     if "Subgrup" not in dasar.columns:
         dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
-
     dasar = dasar.sort_values("Subgrup").reset_index(drop=True)
 
-    # Identifikasi metode dari data awal
     _, hasil_awal = hitung_peta_kendali(dasar)
     pakai_laney = hasil_awal["is_overdispersed"]
+    keputusan = keputusan or {}
 
     tahapan = []
     data_aktif = dasar.copy()
-    seluruh_subgrup_dikeluarkan = []
-
+    subgrup_dikeluarkan = []
     nomor_tahap = 1
 
     while len(data_aktif) >= 2:
-
         df_ctrl, hasil = hitung_peta_kendali(
-            data_aktif,
-            gunakan_laney=pakai_laney
+            data_aktif, gunakan_laney=pakai_laney
         )
-
         ooc = df_ctrl[df_ctrl["Status_OOC"]].copy()
-
         tahapan.append({
             "tahap": nomor_tahap,
             "data": df_ctrl.copy(),
             "ringkasan": hasil.copy(),
             "ooc": ooc.copy(),
-            "dikeluarkan_sebelumnya":
-                seluruh_subgrup_dikeluarkan.copy()
+            "dikeluarkan_sebelumnya": subgrup_dikeluarkan.copy()
         })
 
-        # Berhenti jika sudah tidak ada OOC
-        if ooc.empty:
+        if ooc.empty or nomor_tahap not in keputusan:
             break
 
-        subgrup_ooc = ooc["Subgrup"].astype(int).tolist()
-
-        # Pengaman jika data tersisa kurang dari dua subgrup
-        if len(data_aktif) - len(subgrup_ooc) < 2:
+        assignable = [int(x) for x in keputusan[nomor_tahap]]
+        assignable = [x for x in assignable if x in set(ooc["Subgrup"].astype(int))]
+        if not assignable:
+            break
+        if len(data_aktif) - len(assignable) < 2:
             break
 
-        seluruh_subgrup_dikeluarkan.extend(subgrup_ooc)
-
+        subgrup_dikeluarkan.extend(assignable)
         data_aktif = data_aktif[
-            ~data_aktif["Subgrup"].isin(subgrup_ooc)
+            ~data_aktif["Subgrup"].isin(assignable)
         ].copy().reset_index(drop=True)
-
         nomor_tahap += 1
 
     return tahapan, pakai_laney
@@ -816,28 +815,32 @@ def hitung_level_sigma(total_cacat, total_unit, peluang_per_unit=1, shift=1.5):
 
 
 def get_data_final_in_control():
-    """Mengambil data akhir yang seluruh subgrupnya sudah In Control."""
+    """Mengambil data akhir setelah seluruh titik OOC dievaluasi dan proses In Control."""
     if st.session_state.df_produksi is None:
         return None
 
     dasar = st.session_state.df_produksi.copy()
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
-
     if len(dasar) < 2:
         raise ValueError("Minimal diperlukan dua subgrup untuk analisis peta kendali.")
 
-    tahapan, _ = hitung_tahapan_peta_kendali(dasar)
-
+    tahapan, _ = hitung_tahapan_peta_kendali(
+        dasar, st.session_state.peta_kendali_keputusan
+    )
     if not tahapan:
         raise ValueError("Tidak terdapat tahapan peta kendali yang dapat dihitung.")
 
     tahap_akhir = tahapan[-1]
-
-    # Pastikan seluruh subgrup pada tahap terakhir sudah In Control
     if not tahap_akhir["ooc"].empty:
+        nomor = tahap_akhir["tahap"]
+        if nomor not in st.session_state.peta_kendali_keputusan:
+            raise ValueError(
+                f"Evaluasi penyebab pada Peta Kendali Tahap {nomor} belum selesai. "
+                "Tentukan terlebih dahulu apakah setiap titik Out of Control termasuk Random Causes atau Assignable Causes."
+            )
         raise ValueError(
-            "Proses belum mencapai kondisi In Control. "
-            "Masih terdapat subgrup Out of Control pada tahap terakhir."
+            "Masih terdapat titik Out of Control yang dipertahankan sebagai Random Causes. "
+            "Proses belum mencapai kondisi In Control sehingga analisis ini belum dapat dilakukan."
         )
 
     return tahap_akhir["data"].copy()
@@ -904,6 +907,7 @@ def halaman_beranda():
                 st.session_state.df_produksi = data_baru
                 st.session_state.riwayat_iterasi = []
                 st.session_state.excluded_subgroups = []
+                st.session_state.peta_kendali_keputusan = {}
                 st.success(f"Data berhasil dibaca: {len(data_baru)} subgrup.")
                 st.rerun()
             except Exception as e:
@@ -948,8 +952,22 @@ def halaman_peta_kendali():
     dasar = st.session_state.df_produksi.copy()
     dasar["Subgrup"] = np.arange(1, len(dasar) + 1)
 
+    st.markdown(
+        """
+        <div class="interp-box interp-dark">
+            <b>Jenis Penyebab Variasi</b><br><br>
+            <b>Random Causes:</b> Variasi alami yang melekat pada sistem atau proses dan merupakan akumulasi dari berbagai penyebab kecil yang sulit dihindari.<br><br>
+            <b>Assignable Causes:</b> Variasi yang berasal dari faktor tertentu di luar pola variasi alami proses dan dapat diidentifikasi, seperti kesalahan pengaturan mesin, kesalahan operator, atau bahan baku yang cacat.
+        </div>
+        """,
+        unsafe_allow_html=True
+    )
+    st.markdown("<div style='height: 14px;'></div>", unsafe_allow_html=True)
+
     try:
-        tahapan, pakai_laney = hitung_tahapan_peta_kendali(dasar)
+        tahapan, pakai_laney = hitung_tahapan_peta_kendali(
+            dasar, st.session_state.peta_kendali_keputusan
+        )
     except Exception as e:
         st.error(f"Perhitungan peta kendali gagal: {e}")
         return
@@ -958,8 +976,8 @@ def halaman_peta_kendali():
         st.warning("Tidak terdapat tahapan yang dapat dihitung.")
         return
 
+    evaluasi_menunggu = False
     for hasil_tahap in tahapan:
-
         tahap_ke = hasil_tahap["tahap"]
         df_ctrl = hasil_tahap["data"]
         res = hasil_tahap["ringkasan"]
@@ -967,133 +985,163 @@ def halaman_peta_kendali():
         dikeluarkan = hasil_tahap["dikeluarkan_sebelumnya"]
 
         st.markdown(f"## Peta Kendali — Tahap {tahap_ke}")
-
         if dikeluarkan:
             st.caption(
-                "Subgrup yang telah dikeluarkan pada tahap sebelumnya: "
+                "Subgrup Assignable Causes yang dikeluarkan pada tahap sebelumnya: "
                 + ", ".join(map(str, dikeluarkan))
             )
 
         a, b, c = st.columns(3)
-
-        render_kpi(
-            a, "📈", "Jenis Peta Kendali", res["chart_type"]
-        )
-
-        render_kpi(
-            b, "—", "Garis Tengah (CL)", f"{res['p_bar']:.5f}"
-        )
-
-        render_kpi(
-            c, "⚠", "Jumlah Subgrup Out of Control", str(res["jumlah_ooc"])
-        )
-
-        # Jarak visual antara KPI dan grafik peta kendali
+        render_kpi(a, "📈", "Jenis Peta Kendali", res["chart_type"])
+        render_kpi(b, "—", "Garis Tengah (CL)", f"{res['p_bar']:.5f}")
+        render_kpi(c, "⚠", "Jumlah Subgrup Out of Control", str(res["jumlah_ooc"]))
         st.markdown("<div style='height: 24px;'></div>", unsafe_allow_html=True)
 
-        # Grafik peta kendali
         fig = go.Figure()
-
         fig.add_trace(go.Scatter(
-            x=df_ctrl["Subgrup"],
-            y=df_ctrl["BKA_Aktif"],
-            mode="lines",
-            name="BKA",
-            line=dict(color=MERAH, dash="dash", width=2)
+            x=df_ctrl["Subgrup"], y=df_ctrl["BKA_Aktif"], mode="lines",
+            name="BKA", line=dict(color=MERAH, dash="dash", width=2)
         ))
-
         fig.add_trace(go.Scatter(
-            x=df_ctrl["Subgrup"],
-            y=df_ctrl["CL"],
-            mode="lines",
-            name="CL",
-            line=dict(color=HITAM, width=2)
+            x=df_ctrl["Subgrup"], y=df_ctrl["CL"], mode="lines",
+            name="CL", line=dict(color=HITAM, width=2)
         ))
-
         fig.add_trace(go.Scatter(
-            x=df_ctrl["Subgrup"],
-            y=df_ctrl["BKB_Aktif"],
-            mode="lines",
-            name="BKB",
-            line=dict(color=KUNING, dash="dash", width=2)
+            x=df_ctrl["Subgrup"], y=df_ctrl["BKB_Aktif"], mode="lines",
+            name="BKB", line=dict(color=KUNING, dash="dash", width=2)
         ))
-
         fig.add_trace(go.Scatter(
-            x=df_ctrl["Subgrup"],
-            y=df_ctrl["p_i"],
-            mode="lines+markers",
-            name="Proporsi Cacat (pi)",
-            line=dict(color=HITAM, width=2),
+            x=df_ctrl["Subgrup"], y=df_ctrl["p_i"], mode="lines+markers",
+            name="Proporsi Cacat (pi)", line=dict(color=HITAM, width=2),
             marker=dict(size=7)
         ))
-
-        # Menandai titik OOC
         if not ooc.empty:
             fig.add_trace(go.Scatter(
-                x=ooc["Subgrup"],
-                y=ooc["p_i"],
-                mode="markers",
+                x=ooc["Subgrup"], y=ooc["p_i"], mode="markers",
                 name="Out of Control",
-                marker=dict(
-                    color=MERAH,
-                    size=12,
-                    symbol="diamond"
-                )
+                marker=dict(color=MERAH, size=12, symbol="diamond")
             ))
-
         fig.update_layout(
             title=f"{res['chart_type']} — Tahap {tahap_ke}",
-            xaxis_title="Subgrup",
-            yaxis_title="Proporsi Cacat"
+            xaxis_title="Subgrup", yaxis_title="Proporsi Cacat"
         )
+        st.plotly_chart(style_plotly(fig), use_container_width=True)
 
-        st.plotly_chart(
-            style_plotly(fig),
-            use_container_width=True
-        )
-
-        # Informasi subgrup OOC
-        if not ooc.empty:
-            daftar_ooc = ", ".join(
-                ooc["Subgrup"].astype(str).tolist()
-            )
-
-            st.markdown(
-                f"""<div style="background-color: rgba(255, 165, 0, 0.10);
-                            border-left: 5px solid #f0a22e;
-                            border-radius: 6px;
-                            padding: 0.75rem 1rem;
-                            font-size: 0.9rem;">
-                    ⚠️ &nbsp;<b>Tahap {tahap_ke} belum terkendali secara statistik.</b>
-                    Ditemukan {len(ooc)} subgrup <b>Out of Control</b>, yaitu: {daftar_ooc}.
-                </div>""",
-                unsafe_allow_html=True
-            )
-
-        else:
+        if ooc.empty:
             st.success(
-                f"**Proses sudah terkendali secara statistik pada Tahap {tahap_ke}.** "
+                f"Proses sudah terkendali secara statistik pada Tahap {tahap_ke}. "
                 f"Seluruh {res['jumlah_ic']} subgrup berada di dalam batas kendali."
             )
+            continue
 
-    # Ringkasan hasil akhir
+        daftar_ooc = ", ".join(ooc["Subgrup"].astype(str).tolist())
+        st.markdown(
+            f"""<div style="background-color: rgba(255, 165, 0, 0.10);
+                        border-left: 5px solid #f0a22e; border-radius: 6px;
+                        padding: 0.75rem 1rem; font-size: 0.9rem;">
+                ⚠️ &nbsp;<b>Tahap {tahap_ke} belum terkendali secara statistik.</b>
+                Ditemukan {len(ooc)} subgrup <b>Out of Control</b>, yaitu: {daftar_ooc}.
+            </div>""",
+            unsafe_allow_html=True
+        )
+
+        if tahap_ke in st.session_state.peta_kendali_keputusan:
+            assignable = st.session_state.peta_kendali_keputusan[tahap_ke]
+            random_ids = [int(x) for x in ooc["Subgrup"] if int(x) not in assignable]
+            if assignable:
+                st.info(
+                    "Evaluasi Tahap " + str(tahap_ke) + " telah diterapkan. Subgrup "
+                    + ", ".join(map(str, assignable))
+                    + " dikeluarkan sebagai Assignable Causes."
+                )
+            else:
+                st.warning(
+                    "Tidak ada subgrup yang dikategorikan sebagai Assignable Causes. "
+                    "Seluruh titik Out of Control dipertahankan sebagai Random Causes, "
+                    "sehingga belum dilakukan pembentukan peta kendali tahap berikutnya."
+                )
+                evaluasi_menunggu = True
+
+            if st.button(
+                f"Ubah Evaluasi Tahap {tahap_ke}",
+                key=f"ubah_evaluasi_tahap_{tahap_ke}"
+            ):
+                for nomor in list(st.session_state.peta_kendali_keputusan):
+                    if nomor >= tahap_ke:
+                        st.session_state.peta_kendali_keputusan.pop(nomor, None)
+                st.session_state.pop(f"evaluasi_assignable_tahap_{tahap_ke}", None)
+                st.rerun()
+
+            if not assignable:
+                break
+            continue
+
+        st.markdown("### Evaluasi Penyebab Out of Control")
+        st.write(
+            "Tinjau setiap subgrup yang berada di luar batas kendali. Centang kolom "
+            "**Assignable Causes** apabila penyimpangan disebabkan oleh faktor khusus "
+            "yang dapat diidentifikasi. Jika tidak dicentang, subgrup dipertahankan "
+            "sebagai **Random Causes** dan tetap digunakan dalam perhitungan berikutnya."
+        )
+
+        tabel_evaluasi = pd.DataFrame({
+            "Subgrup": ooc["Subgrup"].astype(int).to_numpy(),
+            "Proporsi": ooc["p_i"].to_numpy(),
+            "BKA": ooc["BKA_Aktif"].to_numpy(),
+            "BKB": ooc["BKB_Aktif"].to_numpy(),
+            "Assignable Causes": [False] * len(ooc)
+        })
+        hasil_edit = st.data_editor(
+            tabel_evaluasi,
+            hide_index=True,
+            use_container_width=True,
+            disabled=["Subgrup", "Proporsi", "BKA", "BKB"],
+            column_config={
+                "Proporsi": st.column_config.NumberColumn("Proporsi", format="%.6f"),
+                "BKA": st.column_config.NumberColumn("BKA", format="%.6f"),
+                "BKB": st.column_config.NumberColumn("BKB", format="%.6f"),
+                "Assignable Causes": st.column_config.CheckboxColumn(
+                    "Assignable Causes",
+                    help="Centang jika penyebab khusus telah diidentifikasi."
+                )
+            },
+            key=f"evaluasi_assignable_tahap_{tahap_ke}"
+        )
+
+        if st.button(
+            f"Terapkan Evaluasi Tahap {tahap_ke}",
+            type="primary",
+            key=f"terapkan_evaluasi_tahap_{tahap_ke}"
+        ):
+            dipilih = hasil_edit.loc[
+                hasil_edit["Assignable Causes"], "Subgrup"
+            ].astype(int).tolist()
+            st.session_state.peta_kendali_keputusan[tahap_ke] = dipilih
+            st.rerun()
+
+        evaluasi_menunggu = True
+        break
+
+    # Ringkasan kondisi tahap terakhir yang telah terbentuk
     tahap_akhir = tahapan[-1]
     ooc_akhir = tahap_akhir["ooc"]
-
     st.markdown("---")
     st.markdown("## Ringkasan Hasil Analisis")
-
     if ooc_akhir.empty:
         st.success(
-            f"Proses mencapai kondisi In Control pada "
-            f"**Tahap {tahap_akhir['tahap']}**."
+            f"Proses mencapai kondisi In Control pada **Tahap {tahap_akhir['tahap']}**."
+        )
+    elif tahap_akhir["tahap"] in st.session_state.peta_kendali_keputusan and not st.session_state.peta_kendali_keputusan[tahap_akhir["tahap"]]:
+        st.warning(
+            "Terdapat titik Out of Control yang dipertahankan sebagai Random Causes. "
+            "Proses belum terkendali secara statistik dan tidak dibuat peta tahap berikutnya."
         )
     else:
-        st.error(
-            f"Proses belum terkendali sampai tahap terakhir "
-            f"yang dapat dihitung. Masih terdapat "
-            f"{len(ooc_akhir)} subgrup Out of Control."
+        st.info(
+            "Silakan evaluasi titik Out of Control pada tabel di atas untuk menentukan "
+            "subgrup yang termasuk Assignable Causes."
         )
+
 
 def halaman_runs_test():
     render_header(judul="Uji Keacakan (Runs Test)")
